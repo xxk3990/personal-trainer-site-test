@@ -1,5 +1,5 @@
 {
-  "name": "worldbuildingdb",
+  "name": "personal-trainer-site-test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,14 +10,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xxk3990/stripe-test.git"
+    "url": "git+https://github.com/xxk3990/personal-trainer-site-test.git"
   },
   "author": "Xander Kaylan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/xxk3990/worldbuildingdb/issues"
+    "url": ""
   },
-  "homepage": "https://github.com/xxk3990/worldbuildingdb#readme",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",

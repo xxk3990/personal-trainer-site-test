@@ -11,7 +11,7 @@ const router = (app) => {
     app.get('/orders', order.getOrders)
     app.post('/addOrder', order.addOrder)
     app.get('/orderInfo', items.getOrderItems);
-    app.post('/addOrderInfo', items.saveOrderItemsInfo)
+    app.post('/addOrderInfo', items.addItemToOrder)
 
 
 }

@@ -11,7 +11,7 @@ const db = {};
 const bcrypt = require("bcrypt");
 const { productModel } = require('./product');
 const { orderModel } = require("./order")
-const { orderItemsModel } = require("./order-items");
+const { orderItemModel } = require("./order-item");
 
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   dialect: 'postgres',
@@ -21,7 +21,7 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 const models = {
     Product: productModel(sequelize, Sequelize.DataTypes),
     Order: orderModel(sequelize, Sequelize.DataTypes),
-    Order_Items: orderItemsModel(sequelize, Sequelize.DataTypes)
+    Order_Item: orderItemModel(sequelize, Sequelize.DataTypes)
 }
 
 fs
@@ -40,13 +40,8 @@ fs
     }
     
   });
-
-  models.Order_Items.hasMany(models.Product, {
-    as: "products_in_order",
-    foreignKey: "product_uuid"
-  })
-  models.Order_Items.hasMany(models.Order, {
-    as: "order_information",
+  models.Order.hasMany(models.Order_Item, {
+    as: "items_in_order",
     foreignKey: "order_uuid"
   })
 

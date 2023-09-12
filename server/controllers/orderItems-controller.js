@@ -4,20 +4,7 @@ const {
 const models = require('../models')
 
 const getOrderItems = async (req, res) => { 
-    const orderItems = await models.Order_Items.findAll({
-        include: [
-            {
-                model: models.Product,
-                attributes: ["product_name", "price"],
-                as: "products_in_order",
-            },
-            {
-                model: models.Order,
-                attributes: ["order_date", "order_total"],
-                as: "order_information"
-            }
-        ]
-    })
+    const orderItems = await models.Order_Item.findAll({where: {'order_uuid': req.body.orderID}})
     if(orderItems.length !== 0) {
         return res.json(orderItems)
     } else {
@@ -25,20 +12,17 @@ const getOrderItems = async (req, res) => {
     }
 }
 
-const saveOrderItemsInfo = async (req, res) => {
+const addItemToOrder = async (req, res) => {
     const matchingOrder = await models.Order.findOne({where: {'id': req.body.orderID}, raw: true})
-    const productsInOrder = req.body.products;
-    productsInOrder.forEach(prod => {
-        const newOrderDetails = {
-            //id, product_uuid, order_uuid, num_items
-            id: uuidv4(),
-            product_uuid: prod.id,
-            order_uuid: matchingOrder.id,
-            num_items: productsInOrder.length,
-        }
-        return models.Order_Items.create(newOrderDetails);
-    })
+    const matchingProduct = await models.Product.findOne({where: {'product_name': req.body.product_name}})
+    const newOrderItem = {
+        //id, product_uuid, order_uuid
+        id: uuidv4(),
+        order_uuid: matchingOrder.id,
+        product_uuid: matchingProduct.id
+    }
     res.status(201).send({"message": 'success!'});
+    return models.Order_Item.create(newOrderItem);
 }
 
-module.exports = {getOrderItems, saveOrderItemsInfo}
+module.exports = {getOrderItems, addItemToOrder}

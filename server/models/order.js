@@ -7,11 +7,9 @@ const orderModel = (sequelize, DataTypes) => {
             allowNull: false,
             autoIncrementIdentity: true
         },
-        order_date: {
-            type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW,
-        },
+        order_date: DataTypes.DATE,
         order_total: DataTypes.NUMERIC,
+        num_items: DataTypes.INTEGER,
         },
         {
             sequelize,

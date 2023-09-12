@@ -3,7 +3,7 @@ const {
 } = require('uuid')
 const models = require('../models')
 
-const getOrders = async (req, res) => { 
+const userOrders = async (req, res) => { 
     const orders = await models.Order.findAll(); //add check for orders based on specific user once users are added
     if(orders.length !== 0) {
         return res.json(orders)
@@ -12,12 +12,13 @@ const getOrders = async (req, res) => {
     }
 }
 
-const addOrder = async (req, res) => {
+const submitOrder = async (req, res) => {
     const newOrder = {
         //id, order_date, order_total
         id: uuidv4(),
         order_date: req.body.order_date,
-        order_total: req.body.order_total
+        order_total: req.body.order_total,
+        num_items: req.body.num_items,
     }
     const requiredOrderData = {
         order: newOrder,
@@ -27,4 +28,4 @@ const addOrder = async (req, res) => {
     return models.Order.create(newOrder);
 }
 
-module.exports = {getOrders, addOrder}
+module.exports = {userOrders, submitOrder}

@@ -14,7 +14,7 @@ module.exports = {
             defaultValue: Sequelize.NOW,
         },
         order_total: Sequelize.NUMERIC,
-        
+        num_items: Sequelize.INTEGER,
     });
   },
   async down(queryInterface, Sequelize) {

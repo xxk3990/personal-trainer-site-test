@@ -11,7 +11,6 @@ module.exports = {
         },
         order_uuid: Sequelize.UUID,
         product_uuid: Sequelize.UUID,
-        num_items: Sequelize.INTEGER
         
     });
   },

@@ -1,6 +1,6 @@
 'use strict';
-const orderItemsModel = (sequelize, DataTypes) => {
-    const OrderItem = sequelize.define('Order_Items', {
+const orderItemModel = (sequelize, DataTypes) => {
+    const OrderItem = sequelize.define('Order_Item', {
         id: {
             type: DataTypes.UUID,
             primaryKey: true,
@@ -9,11 +9,10 @@ const orderItemsModel = (sequelize, DataTypes) => {
         },
         order_uuid: DataTypes.UUID,
         product_uuid: DataTypes.UUID,
-        num_items: DataTypes.INTEGER
         },
         {
             sequelize,
-            modelName: "Order_Items",
+            modelName: "Order_Item",
             tableName: "order_items",
             underscored: true
         }
@@ -21,4 +20,4 @@ const orderItemsModel = (sequelize, DataTypes) => {
     return OrderItem;
 }
 
-module.exports = {orderItemsModel}
+module.exports = {orderItemModel}

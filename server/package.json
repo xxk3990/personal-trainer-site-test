@@ -15,7 +15,7 @@
   "author": "Xander Kaylan",
   "license": "ISC",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/xxk3990/personal-trainer-site-test/issues"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

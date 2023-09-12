@@ -5,7 +5,7 @@ module.exports = {
   "development": {
     "username": null,
     "password": null,
-    "database": "worldbuildingdb",
+    "database": "personal-trainer-site",
     "host": "localhost",
     "dialect": "postgres"
   },

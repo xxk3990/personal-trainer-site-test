@@ -14,7 +14,7 @@ const userOrders = async (req, res) => {
 
 const submitOrder = async (req, res) => {
     const newOrder = {
-        //id, order_date, order_total
+        //id, order_date, order_total, number of items
         id: uuidv4(),
         order_date: req.body.order_date,
         order_total: req.body.order_total,

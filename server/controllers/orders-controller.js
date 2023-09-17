@@ -9,13 +9,12 @@ const userOrders = async (req, res) => {
     if(orders.length !== 0) {
         return res.json(orders)
     } else {
-        return res.send([]) //send empty response so front-end can check if products.length === 0
+        return res.send([]) //send empty response so front-end can check if orders.length === 0
     }
 }
 
 const submitOrder = async (req, res) => {
     const orderDate = new Date(req.body.order_date).toISOString();
-    let orderItemCreated = false;
     const newOrder = {
         //id, order_date, order_total, number of items
         id: uuidv4(),
@@ -23,22 +22,13 @@ const submitOrder = async (req, res) => {
         order_total: req.body.order_total,
         num_items: req.body.num_items,
     }
-    models.Order.create(newOrder);
-    const cartItems = req.body.cart_items
-    cartItems.forEach(async ci => {
-        const isCreated = await oi.saveOrderItems(newOrder.id, ci.product_name)
-        if(isCreated) {
-            orderItemCreated = true;
-        } else {
-            orderItemCreated = false;
-        }
+    const orderItems = req.body.cart_items
+    orderItems.forEach(async ci => {
+        await oi.saveOrderItems(newOrder.id, ci.product_name)
     })
-    if(!orderItemCreated) {
-        res.status(201).send();
-    } else {
-        res.status(400).send();
-    }
-    
+    models.Order.create(newOrder);
+    res.status(201).send()
+      
 }
 
 module.exports = {userOrders, submitOrder}

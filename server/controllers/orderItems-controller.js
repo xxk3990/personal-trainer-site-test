@@ -14,8 +14,8 @@ const getOrderItems = async (req, res) => {
 
 const saveOrderItems = async (orderID, productName) => {
     const matchingProduct = await models.Product.findOne({where: {'product_name': productName}})
-    if(!matchingProduct) {
-        return; //bail out and fail
+    if(matchingProduct.length === 0 || orderID === undefined) {
+        return;
     } else {
         const newOrderItem = {
             //id, product_uuid, order_uuid
@@ -25,7 +25,6 @@ const saveOrderItems = async (orderID, productName) => {
         }
         return models.Order_Item.create(newOrderItem);
     }
-   
 }
 
 module.exports = {getOrderItems, saveOrderItems}

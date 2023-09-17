@@ -14,21 +14,24 @@ const userOrders = async (req, res) => {
 }
 
 const submitOrder = async (req, res) => {
-    const orderDate = new Date(req.body.order_date).toISOString();
-    const newOrder = {
-        //id, order_date, order_total, number of items
-        id: uuidv4(),
-        order_date: orderDate,
-        order_total: req.body.order_total,
-        num_items: req.body.num_items,
+    const orderItems = req.body.cart_items;
+    if(orderItems.length === 0 || !orderItems) { //if there is an issue with the items in their order
+        return res.status(400).send()
+    } else {
+        const orderDate = new Date(req.body.order_date).toISOString();
+        const newOrder = {
+            //id, order_date, order_total, number of items
+            id: uuidv4(),
+            order_date: orderDate,
+            order_total: req.body.order_total,
+            num_items: req.body.num_items,
+        }
+        orderItems.forEach(async ci => {
+            await oi.saveOrderItems(newOrder.id, ci.product_name)
+        })
+        models.Order.create(newOrder);
+        return res.status(201).send()
     }
-    const orderItems = req.body.cart_items
-    orderItems.forEach(async ci => {
-        await oi.saveOrderItems(newOrder.id, ci.product_name)
-    })
-    models.Order.create(newOrder);
-    res.status(201).send()
-      
 }
 
 module.exports = {userOrders, submitOrder}

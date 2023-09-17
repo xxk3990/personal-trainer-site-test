@@ -10,7 +10,7 @@ module.exports = {
         autoIncrementIdentity: true
       },
       order_date: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         defaultValue: Sequelize.NOW,
       },
       order_total: Sequelize.NUMERIC,

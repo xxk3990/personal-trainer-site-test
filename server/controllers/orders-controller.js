@@ -2,6 +2,7 @@ const {
     v4: uuidv4
 } = require('uuid')
 const models = require('../models')
+const oi = require("./orderItems-controller");
 
 const userOrders = async (req, res) => { 
     const orders = await models.Order.findAll(); //add check for orders based on specific user once users are added
@@ -13,19 +14,31 @@ const userOrders = async (req, res) => {
 }
 
 const submitOrder = async (req, res) => {
+    const orderDate = new Date(req.body.order_date).toISOString();
+    let orderItemCreated = false;
     const newOrder = {
         //id, order_date, order_total, number of items
         id: uuidv4(),
-        order_date: req.body.order_date,
+        order_date: orderDate,
         order_total: req.body.order_total,
         num_items: req.body.num_items,
     }
-    const requiredOrderData = {
-        order: newOrder,
-        orderID: newOrder.id,
+    models.Order.create(newOrder);
+    const cartItems = req.body.cart_items
+    cartItems.forEach(async ci => {
+        const isCreated = await oi.saveOrderItems(newOrder.id, ci.product_name)
+        if(isCreated) {
+            orderItemCreated = true;
+        } else {
+            orderItemCreated = false;
+        }
+    })
+    if(!orderItemCreated) {
+        res.status(201).send();
+    } else {
+        res.status(400).send();
     }
-    res.status(201).send(requiredOrderData);
-    return models.Order.create(newOrder);
+    
 }
 
 module.exports = {userOrders, submitOrder}

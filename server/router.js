@@ -12,7 +12,6 @@ const router = (app) => {
     //app.get('/allOrders', admin.getAllOrders) not created yet
     app.post('/submitOrder', order.submitOrder)
     app.get('/orderItems', items.getOrderItems);
-    app.post('/addOrderItem', items.addItemToOrder)
 
 
 }

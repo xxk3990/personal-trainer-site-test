@@ -40,3 +40,7 @@ button {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
 }
+
+.basket {
+    height: 400px;
+}

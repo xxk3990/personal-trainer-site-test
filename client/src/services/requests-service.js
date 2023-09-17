@@ -9,3 +9,17 @@ export const handleGet = async (endpoint, setDataInComponent) => {
         return setDataInComponent(responseData); //set it equal to data from API
     })
 }
+
+export const handlePost = async (endpoint, body) => {
+    const url = `http://localhost:3000/${endpoint}`;
+        const requestParams = {
+            method: 'POST',
+            headers: {
+                "Content-Type": 'application/json',
+            //"Authorization": `Bearer ${token}` 
+            },
+        // credentials: 'include',
+            body: JSON.stringify(body)
+        }
+    return fetch(url, requestParams)
+}

@@ -1,7 +1,5 @@
 import React  from 'react';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { handleGet, handlePost } from './services/requests-service';
 import './styles/shopping-cart.css';
 
@@ -70,7 +68,7 @@ export default function ShoppingCart() {
             return (
                 <div className="ShoppingCart">
                   <h1>Shopping Cart</h1>
-                  <section className='products'>
+                  <section className='products-grid'>
                     {products.map(p => {
                         return (
                             <section className='product-details'>
@@ -87,16 +85,14 @@ export default function ShoppingCart() {
             return (
                 <div className="ShoppingCart">
                     <h1>Shopping Cart</h1>
-                    <section className='products'>
-                        <section className = "products-grid">
-                            {products.map(p => {
-                                return (
-                                    <section className='product-details'>
-                                        <Product p={p} addToCart={addToCart}/>
-                                    </section>
-                                )
-                            })}
-                        </section>
+                    <section className = "products-grid">
+                        {products.map(p => {
+                            return (
+                                <section className='product-details'>
+                                    <Product p={p} addToCart={addToCart}/>
+                                </section>
+                            )
+                        })}
                     </section>
                     <section className='basket'>
                         <ul className='cart-items-list'>

@@ -1,8 +1,9 @@
-.ShoppingCart {
+.Products {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+
 .products-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -18,22 +19,4 @@
 
 button {
     cursor: pointer;
-}
-
-.cart-items-list {
-    list-style-type: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid black;
-    width: 250px;
-    padding-left: 0;
-}
-.cart-items-list li {
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
-}
-
-.basket {
-    height: 400px;
 }

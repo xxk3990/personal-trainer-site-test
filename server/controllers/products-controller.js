@@ -15,7 +15,7 @@ const getProducts = async (req, res) => {
 const addProduct = async (req, res) => {
     const newProduct = {
         //id, product_name, image_url, price
-        id: uuidv4(),
+        uuid: uuidv4(),
         product_name: req.body.product_name,
         image_url: req.body.image_url, //replace with AWS link later on
         price: req.body.price

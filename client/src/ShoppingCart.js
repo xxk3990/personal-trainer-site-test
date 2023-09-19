@@ -17,19 +17,31 @@ export default function ShoppingCart() {
         getProducts()
     }, []);
     const addToCart = (item) => {
-        if(cartItems.includes(item)) { //if it already exists
-            return; //do not add again
-        } else {
+        if(cartItems.length === 0) {
             setCartItems([...cartItems, item])
-            calcOrderTotal(parseFloat(item.price));
+            calcOrderTotal(parseInt(item.price));
+        } else {
+            const tempCart = [...cartItems];
+            const itemIndex = tempCart.findIndex((product) => item.product_uuid === product.product_uuid)
+            if(!tempCart[itemIndex]) {
+                tempCart.push({...item, quantity: item.quantity})
+                console.log("tempCart after new entry:", tempCart)
+                calcOrderTotal(parseInt(item.price))
+            } else {
+                const prod = tempCart[itemIndex];
+                tempCart[itemIndex] = {...prod, quantity: prod.quantity + item.quantity, price: parseInt(prod.price) + parseInt(item.price)}
+                calcOrderTotal(parseInt(item.price));
+                console.log("tempCart after existing entry:", tempCart)
+            }
+            setCartItems(tempCart)
+            
         }
-        
     }
     const calcOrderTotal = (currentItemPrice) => {
-    //first .map is to get just the price prop, second is to convert all values to correct data type (float)
-        const allPrices = cartItems.map(x => x.price).map(x => parseFloat(x))
-        const totalCost = allPrices.reduce((acc, value) => {
-            return acc += value
+    //first .map is to get just the price prop, second is to convert all values to correct data type (int)
+        const allPrices = cartItems.map(x => x.price).map(x => parseInt(x))
+        const totalCost = allPrices.reduce(() => {
+            return currentItemPrice + orderTotal;
         }, currentItemPrice)
         console.log(totalCost);
         return setOrderTotal(totalCost);
@@ -45,7 +57,7 @@ export default function ShoppingCart() {
             cart_items: cartItems,
             order_date: `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
             order_total: orderTotal,
-            num_items: cartItems.length
+            num_items: cartItems.length,
         }
         try {
             const response = await handlePost(endpoint, requestBody);
@@ -81,7 +93,6 @@ export default function ShoppingCart() {
                 </div>
             );
         } else {
-            console.log(cartItems)
             return (
                 <div className="ShoppingCart">
                     <h1>Shopping Cart</h1>
@@ -114,9 +125,15 @@ const Product = (props) => {
     const p = props.p;
     const addToCart = props.addToCart
    // let inCart = props.inCart
+    const item = {
+        product_name: p.product_name,
+        product_uuid: p.uuid,
+        price: p.price,
+        quantity: 1
+    }
     const handleClick = () => {
         //call parent "add to cart" method with child's unique product info
-        addToCart(p);
+        addToCart(item);
     }
     // const handleRemove = () => {
 
@@ -133,6 +150,6 @@ const Product = (props) => {
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
     return (
-        <span>{ci.product_name}, {ci.price}</span> //will include image in future
+        <span>{ci.quantity}&nbsp;{ci.product_name}, {ci.price}</span> //will include image in future
     )
 }

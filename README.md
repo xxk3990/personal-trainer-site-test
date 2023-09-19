@@ -1,2 +1,2 @@
-# personal-trainer-site-test
+# Trainer Site Shopping Cart
 Newest code in develop branch

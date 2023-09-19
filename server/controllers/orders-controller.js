@@ -13,7 +13,7 @@ const userOrders = async (req, res) => {
     }
 }
 
-const submitOrder = async (req, res) => {
+const submitOrder = async (req, res) => { //add transactional integrity
     const orderItems = req.body.cart_items;
     if(orderItems.length === 0 || !orderItems) { //if there is an issue with the items in their order
         return res.status(400).send()
@@ -21,13 +21,13 @@ const submitOrder = async (req, res) => {
         const orderDate = new Date(req.body.order_date).toISOString();
         const newOrder = {
             //id, order_date, order_total, number of items
-            id: uuidv4(),
+            uuid: uuidv4(),
             order_date: orderDate,
             order_total: req.body.order_total,
             num_items: req.body.num_items,
         }
         orderItems.forEach(async ci => {
-            await oi.saveOrderItems(newOrder.id, ci.product_name)
+            await oi.saveOrderItems(newOrder.uuid, ci.product_uuid, ci.quantity);
         })
         models.Order.create(newOrder);
         return res.status(201).send()

@@ -1,14 +1,14 @@
 'use strict';
 const orderModel = (sequelize, DataTypes) => {
     const Order = sequelize.define('Order', {
-        id: {
+        uuid: {
             type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false,
             autoIncrementIdentity: true
         },
         order_date: DataTypes.DATEONLY,
-        order_total: DataTypes.NUMERIC,
+        order_total: DataTypes.INTEGER,
         num_items: DataTypes.INTEGER,
         },
         {

@@ -12,16 +12,17 @@ const getOrderItems = async (req, res) => {
     }
 }
 
-const saveOrderItems = async (orderID, productName) => {
-    const matchingProduct = await models.Product.findOne({where: {'product_name': productName}})
-    if(matchingProduct.length === 0 || orderID === undefined) {
+const saveOrderItems = async (orderUUID, productUUID, quantity) => {
+    const matchingProduct = await models.Product.findOne({where: {'uuid': productUUID}})
+    if(matchingProduct.length === 0 || orderUUID === undefined) {
         return;
     } else {
         const newOrderItem = {
             //id, product_uuid, order_uuid
-            id: uuidv4(),
-            order_uuid: orderID,
-            product_uuid: matchingProduct.id
+            uuid: uuidv4(),
+            order_uuid: orderUUID,
+            product_uuid: matchingProduct.uuid,
+            quantity: quantity,
         }
         return models.Order_Item.create(newOrderItem);
     }

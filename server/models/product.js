@@ -1,7 +1,7 @@
 'use strict';
 const productModel = (sequelize, DataTypes) => {
     const Product = sequelize.define('Product', {
-        id: {
+        uuid: {
             type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false,

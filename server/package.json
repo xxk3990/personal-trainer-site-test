@@ -1,5 +1,5 @@
 {
-  "name": "personal-trainer-site-test",
+  "name": "trainer-site-shopping-cart",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xxk3990/personal-trainer-site-test.git"
+    "url": "git+https://github.com/xxk3990/trainer-site-shopping-cart.git"
   },
   "author": "Xander Kaylan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/xxk3990/personal-trainer-site-test/issues"
+    "url": "https://github.com/xxk3990/trainer-site-shopping-cart/issues"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

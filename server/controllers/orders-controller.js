@@ -3,6 +3,7 @@ const {
 } = require('uuid')
 const models = require('../models')
 const oi = require("./orderItems-controller");
+const utils = require('./controller-utils')
 
 const userOrders = async (req, res) => { 
     const orders = await models.Order.findAll(); //add check for orders based on specific user once users are added
@@ -15,16 +16,16 @@ const userOrders = async (req, res) => {
 
 const submitOrder = async (req, res) => { //add transactional integrity
     const orderItems = req.body.cart_items;
+    const formattedTotal = utils.removeDecimalIfNeeded(req.body.order_total)
     if(orderItems.length === 0 || !orderItems) { //if there is an issue with the items in their order
         return res.status(400).send()
     } else {
         const orderDate = new Date(req.body.order_date).toISOString();
         const newOrder = {
-            //id, order_date, order_total, number of items
+            //id, order_date, order_total
             uuid: uuidv4(),
             order_date: orderDate,
-            order_total: req.body.order_total,
-            num_items: req.body.num_items,
+            order_total: formattedTotal,
         }
         orderItems.forEach(async ci => {
             await oi.saveOrderItems(newOrder.uuid, ci.product_uuid, ci.quantity);

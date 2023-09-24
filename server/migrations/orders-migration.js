@@ -14,7 +14,6 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
       order_total: Sequelize.INTEGER,
-      num_items: Sequelize.INTEGER,
       created_at: {
         allowNull: false,
         type: Sequelize.DATE

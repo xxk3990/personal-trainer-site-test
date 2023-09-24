@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { handleGet, handlePost } from './services/requests-service';
 import './styles/orders.css';
+import { addDecimal, isWholeNumber } from './util-methods';
 
 export default function Orders() {
     const [orders, setOrders] = useState([]);
@@ -34,11 +35,13 @@ export default function Orders() {
 }
 const OrderTile = (props) => {
     const odr = props.odr;
+    const formattedTotal = addDecimal(odr.order_total)
+    const isInt = isWholeNumber(odr.order_total);
+    const newTotal = isInt === true ? odr.order_total : formattedTotal
     return (
         <section className='order-info'>
             <h3>Date: {odr.order_date}</h3>
-            <p>Amount: ${odr.order_total}</p>
-            <p>Items purchased: {odr.num_items}</p>
+            <p>Amount: ${newTotal}</p>
         </section>
     )
 }

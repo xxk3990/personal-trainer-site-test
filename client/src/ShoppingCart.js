@@ -1,13 +1,15 @@
 import React  from 'react';
 import { useState, useEffect } from 'react';
 import { handleGet, handlePost } from './services/requests-service';
+import { addDecimal, isWholeNumber } from './util-methods';
+import { Snackbar } from '@mui/material';
 import './styles/shopping-cart.css';
 
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
     const [cartItems, setCartItems] = useState([]);
     const [orderTotal, setOrderTotal] = useState(0)
-    const today = new Date();
+    const [openSnackbar, setOpenSnackbar] = useState(false);
     const getProducts = async () => {
         const endpoint = `allProducts`
         handleGet(endpoint, setProducts)
@@ -19,32 +21,40 @@ export default function ShoppingCart() {
     const addToCart = (item) => {
         if(cartItems.length === 0) {
             setCartItems([...cartItems, item])
-            calcOrderTotal(parseInt(item.price));
+            calcOrderTotal(Number(item.price));
         } else {
             const tempCart = [...cartItems];
             const itemIndex = tempCart.findIndex((product) => item.product_uuid === product.product_uuid)
             if(!tempCart[itemIndex]) {
                 tempCart.push({...item, quantity: item.quantity})
-                console.log("tempCart after new entry:", tempCart)
-                calcOrderTotal(parseInt(item.price))
+                calcOrderTotal(Number(item.price))
             } else {
                 const prod = tempCart[itemIndex];
-                tempCart[itemIndex] = {...prod, quantity: prod.quantity + item.quantity, price: parseInt(prod.price) + parseInt(item.price)}
-                calcOrderTotal(parseInt(item.price));
-                console.log("tempCart after existing entry:", tempCart)
+                const isInt = isWholeNumber(Number(item.price));
+                tempCart[itemIndex] = {
+                    ...prod, 
+                    quantity: prod.quantity + item.quantity, 
+                    price: isInt === true ? Number(prod.price) + Number(item.price) : Number(Number(Number(prod.price) + Number(item.price)).toFixed(2))
+                }
+                calcOrderTotal(Number(item.price));
             }
             setCartItems(tempCart)
             
         }
     }
     const calcOrderTotal = (currentItemPrice) => {
-    //first .map is to get just the price prop, second is to convert all values to correct data type (int)
-        const allPrices = cartItems.map(x => x.price).map(x => parseInt(x))
+    //first .map is to get just the price prop, second is to convert all values to number (float or int)
+        const allPrices = cartItems.map(x => x.price).map(x => Number(x))
         const totalCost = allPrices.reduce(() => {
             return currentItemPrice + orderTotal;
         }, currentItemPrice)
         console.log(totalCost);
-        return setOrderTotal(totalCost);
+        const isInt = isWholeNumber(totalCost);
+        if(isInt) {
+            return setOrderTotal(totalCost); //if its a whole number, add as is
+        } else {
+            return setOrderTotal(Number(Number(totalCost).toFixed(2))); //if decimal, round
+        }
     }
     // removeItemFromCart = (item) => {
     //     cartItems.filter(() => {
@@ -53,17 +63,20 @@ export default function ShoppingCart() {
     // }
     const submitOrder = async() => {
         const endpoint = `submitOrder`;
+        const today = new Date();
         const requestBody = {
             cart_items: cartItems,
             order_date: `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`,
             order_total: orderTotal,
-            num_items: cartItems.length,
         }
         try {
             const response = await handlePost(endpoint, requestBody);
             if(response.status === 200 || response.status === 201) {
-                alert("Order successful!");
-                setCartItems([]);
+                setOpenSnackbar(true);
+                setTimeout(() => {
+                    setOpenSnackbar(false);
+                    setCartItems([]);
+                }, 1500)
             }
         } catch {
             alert("An error occurred!")
@@ -95,6 +108,7 @@ export default function ShoppingCart() {
         } else {
             return (
                 <div className="ShoppingCart">
+                    <Snackbar open={openSnackbar} autoHideDuration={1500} message="Order Submitted Successfully!" anchorOrigin={{horizontal: "center", vertical:"top"}}/>
                     <h1>Shopping Cart</h1>
                     <section className = "products-grid">
                         {products.map(p => {
@@ -124,11 +138,12 @@ export default function ShoppingCart() {
 const Product = (props) => {
     const p = props.p;
     const addToCart = props.addToCart
-   // let inCart = props.inCart
+    const formattedPrice = addDecimal(p.price);
+    const isInt = isWholeNumber(Number(p.price));
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
-        price: p.price,
+        price: isInt === true ? p.price : formattedPrice,
         quantity: 1
     }
     const handleClick = () => {
@@ -141,7 +156,7 @@ const Product = (props) => {
     return (
         <section className="product-info">
           <h3 id="productname">{p.product_name}</h3>
-          <p>${p.price}</p>
+          <p>${item.price}</p>
           <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
         </section>
     )

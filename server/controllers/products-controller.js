@@ -2,6 +2,7 @@ const {
     v4: uuidv4
 } = require('uuid')
 const models = require('../models')
+const utils = require('./controller-utils')
 
 const getProducts = async (req, res) => { 
     const products = await models.Product.findAll();
@@ -13,15 +14,18 @@ const getProducts = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
+    const priceAsInt = utils.removeDecimalIfNeeded(req.body.price)
     const newProduct = {
         //id, product_name, image_url, price
         uuid: uuidv4(),
         product_name: req.body.product_name,
         image_url: req.body.image_url, //replace with AWS link later on
-        price: req.body.price
+        price: priceAsInt
     }
     res.status(201).send({"message": 'success!'});
     return models.Product.create(newProduct);
 }
+
+
 
 module.exports = {getProducts, addProduct}

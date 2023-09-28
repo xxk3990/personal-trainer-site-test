@@ -122,7 +122,7 @@ export default function ShoppingCart() {
                     <section className='basket'>
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
-                                return <li key={ci.id}><CartItem ci={ci}/></li>
+                                return <li key={ci.uuid}><CartItem ci={ci}/></li>
                             })}
                         </ul>
                         <span className='order-total'>Total: ${orderTotal}</span>
@@ -144,19 +144,18 @@ const Product = (props) => {
         product_name: p.product_name,
         product_uuid: p.uuid,
         price: isInt === true ? p.price : formattedPrice,
+        image_url: p.image_url,
         quantity: 1
     }
     const handleClick = () => {
         //call parent "add to cart" method with child's unique product info
         addToCart(item);
     }
-    // const handleRemove = () => {
-
-    // }
     return (
         <section className="product-info">
           <h3 id="productname">{p.product_name}</h3>
           <p>${item.price}</p>
+          <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
           <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
         </section>
     )
@@ -165,6 +164,11 @@ const Product = (props) => {
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
     return (
-        <span>{ci.quantity}&nbsp;{ci.product_name}, {ci.price}</span> //will include image in future
+        <section className='cart-item-li'>
+            <span>{ci.quantity}</span>
+            <span>{ci.product_name}</span>
+            <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
+            <span>{ci.price}</span>
+        </section>
     )
 }

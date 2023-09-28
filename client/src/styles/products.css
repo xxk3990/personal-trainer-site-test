@@ -17,6 +17,10 @@
     margin-top: 10px;
 }
 
+.product-list-img {
+    max-width: 100px;
+}
+
 button {
     cursor: pointer;
 }

@@ -11,7 +11,10 @@ module.exports = {
       },
       order_uuid: Sequelize.UUID,
       product_uuid: Sequelize.UUID,
-      quantity: Sequelize.INTEGER,
+      quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE

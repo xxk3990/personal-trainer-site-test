@@ -10,6 +10,7 @@ export default function ShoppingCart() {
     const [cartItems, setCartItems] = useState([]);
     const [orderTotal, setOrderTotal] = useState(0)
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
     const getProducts = async () => {
         const endpoint = `allProducts`
         handleGet(endpoint, setProducts)
@@ -73,9 +74,18 @@ export default function ShoppingCart() {
             const response = await handlePost(endpoint, requestBody);
             if(response.status === 200 || response.status === 201) {
                 setOpenSnackbar(true);
+                setSnackbarMessage("Order Submitted Successfully!");
                 setTimeout(() => {
                     setOpenSnackbar(false);
                     setCartItems([]);
+                    setSnackbarMessage("");
+                }, 1500)
+            } else {
+                setOpenSnackbar(true);
+                setSnackbarMessage("Order Failed.");
+                setTimeout(() => {
+                    setOpenSnackbar(false);
+                    setSnackbarMessage("");
                 }, 1500)
             }
         } catch {
@@ -108,7 +118,7 @@ export default function ShoppingCart() {
         } else {
             return (
                 <div className="ShoppingCart">
-                    <Snackbar open={openSnackbar} autoHideDuration={1500} message="Order Submitted Successfully!" anchorOrigin={{horizontal: "center", vertical:"top"}}/>
+                    <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
                     <h1>Shopping Cart</h1>
                     <section className = "products-grid">
                         {products.map(p => {

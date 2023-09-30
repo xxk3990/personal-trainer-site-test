@@ -2,7 +2,6 @@ const {
     v4: uuidv4
 } = require('uuid')
 const models = require('../models')
-const oi = require("./orderItems-controller");
 const utils = require('./controller-utils')
 
 const userOrders = async (req, res) => { 
@@ -27,11 +26,23 @@ const submitOrder = async (req, res) => { //add transactional integrity
             order_date: orderDate,
             order_total: formattedTotal,
         }
-        orderItems.forEach(async ci => {
-            await oi.saveOrderItems(newOrder.uuid, ci.product_uuid, ci.quantity);
-        })
-        models.Order.create(newOrder);
-        return res.status(201).send()
+        try {
+            models.sequelize.transaction(async() => {
+                orderItems.map(async item => {
+                    return await models.Order_Item.create({
+                        uuid: uuidv4(),
+                        order_uuid: newOrder.uuid,
+                        product_uuid: item.product_uuid,
+                        quantity: item.quantity
+                    })
+                })
+                await models.Order.create(newOrder);
+                return res.status(201).send()
+            })
+        } catch {
+            return res.status(400).send();
+        }
+        
     }
 }
 

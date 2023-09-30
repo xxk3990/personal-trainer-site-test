@@ -11,21 +11,7 @@ const getOrderItems = async (req, res) => {
         return res.send([]) //send empty response so front-end can check if orderItems.length === 0
     }
 }
+  
 
-const saveOrderItems = async (orderUUID, productUUID, quantity) => {
-    const matchingProduct = await models.Product.findOne({where: {'uuid': productUUID}})
-    if(matchingProduct.length === 0 || orderUUID === undefined) {
-        return;
-    } else {
-        const newOrderItem = {
-            //id, product_uuid, order_uuid
-            uuid: uuidv4(),
-            order_uuid: orderUUID,
-            product_uuid: matchingProduct.uuid,
-            quantity: quantity,
-        }
-        return models.Order_Item.create(newOrderItem);
-    }
-}
 
-module.exports = {getOrderItems, saveOrderItems}
+module.exports = {getOrderItems}

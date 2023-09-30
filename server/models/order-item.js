@@ -9,15 +9,17 @@ const orderItemModel = (sequelize, DataTypes) => {
         },
         order_uuid: DataTypes.UUID,
         product_uuid: DataTypes.UUID,
-        quantity: DataTypes.INTEGER,
+        quantity: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
-        {
-            sequelize,
-            modelName: "Order_Item",
-            tableName: "order_items",
-            underscored: true
-        }
-    )
+    },
+    {
+        sequelize,
+        modelName: "Order_Item",
+        tableName: "order_items",
+        underscored: true
+    })
     return OrderItem;
 }
 

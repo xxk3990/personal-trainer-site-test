@@ -29,6 +29,7 @@ export default function ShoppingCart() {
             if(!tempCart[itemIndex]) {
                 tempCart.push({...item, quantity: item.quantity})
                 calcOrderTotal(Number(item.price), "addition", item.quantity)
+                setCartItems(tempCart)
             } else {
                 const prod = tempCart[itemIndex];
                 const isInt = isWholeNumber(Number(item.price));
@@ -38,10 +39,24 @@ export default function ShoppingCart() {
                     price: isInt === true ? Number(prod.price) + Number(item.price) : Number(Number(Number(prod.price) + Number(item.price)).toFixed(2))
                 }
                 calcOrderTotal(Number(item.price), "addition", item.quantity);
+                setCartItems(tempCart);
             }
-            setCartItems(tempCart)
-            
         }
+    }
+
+    const increaseQuantity = (item) => {
+        const tempCart = [...cartItems];
+        const isInt = isWholeNumber(Number(item.price));
+        const itemIndex = tempCart.findIndex((product) => item.product_uuid === product.product_uuid)
+        const prod = tempCart[itemIndex];
+        const unitPrice = Number(item.price) / item.quantity;
+        tempCart[itemIndex] = {
+            ...prod, 
+            quantity: prod.quantity + 1, 
+            price: isInt === true ? Number(prod.price) + unitPrice : Number(Number(Number(prod.price) + unitPrice).toFixed(2))
+        }
+        calcOrderTotal(unitPrice, "addition", 1);
+        setCartItems(tempCart);
     }
 
     const removeFromCart = (itemRemoved) => {
@@ -169,7 +184,7 @@ export default function ShoppingCart() {
                     <section className='basket'>
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
-                                return <li key={ci.uuid}><CartItem ci={ci} removeFromCart={removeFromCart}/></li>
+                                return <li key={ci.uuid}><CartItem ci={ci} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity}/></li>
                             })}
                         </ul>
                         <footer className='cart-footer'>Total: ${orderTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
@@ -211,8 +226,12 @@ const Product = (props) => {
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
     const removeFromCart = props.removeFromCart;
-    const handleClick = () => {
+    const increaseQuantity = props.increaseQuantity;
+    const handleRemove = () => {
         removeFromCart(ci);
+    }
+    const handleIncrease = () => {
+        increaseQuantity(ci);
     }
     return (
         <section className='cart-item-li'>
@@ -220,7 +239,12 @@ const CartItem = (props) => {
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
             <span>{ci.price}</span>
-            <button type="button" className='remove-from-order-btn' onClick={handleClick}> – </button>
+            <footer className='cart-item-footer'>
+                <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
+                <button type="button" className='item-btn' onClick={handleRemove} title='Decrease to 0 to remove completely.'> – </button>
+            </footer>
+            
+            
         </section>
     )
 }

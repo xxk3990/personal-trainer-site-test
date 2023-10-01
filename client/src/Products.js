@@ -3,6 +3,7 @@ import { useState, useEffect} from 'react';
 import { handleGet, handlePost } from './services/requests-service';
 import './styles/products.css';
 import { Snackbar } from '@mui/material';
+import { isWholeNumber, addDecimal } from './util-methods';
 
 export default function Products() {
     const [products, setProducts] = useState([]);
@@ -90,11 +91,14 @@ export default function Products() {
 
 const Product = (props) => {
     const p = props.p;
+    const formattedPrice = addDecimal(p.price);
+    const isInt = isWholeNumber(Number(p.price));
+    const price = isInt === true ? p.price : formattedPrice;
     return (
         <section className="product-info">
             <h3 id="productname">{p.product_name}</h3>
             <img className="product-list-img" src = {p.image_url} alt = {p.product_name}/>
-            <p>${p.price}</p>
+            <p>${price}</p>
         </section>
     )
 }

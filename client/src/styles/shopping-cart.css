@@ -33,11 +33,18 @@ button {
     border-left: 1px solid black;
     border-right: 1px solid black;
     border-top: 1px solid black;
-    width: 250px;
+    width: 400px;
     padding-left: 0;
 }
+
 .cart-items-list li {
     border-bottom: 1px solid black;
+    width: 100%;
+}
+
+.cart-items-list li span, 
+.cart-items-list li button {
+    margin-top: 20px;
 }
 
 .basket {
@@ -55,4 +62,9 @@ button {
 
 .img-in-cart {
     max-width: 75px;
+}
+
+.remove-from-order-btn {
+    height: 25px;
+    margin-left: 25px;
 }

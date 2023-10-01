@@ -9,7 +9,8 @@ export default function Navbar() {
             <section className='nav-loggedin'>
                 <ul className = "nav-links">
                     <li className='nav-item'><Link to='/shoppingCart'>Shopping Cart</Link></li>
-                    <li className='nav-item'><Link to='/orders'>Orders</Link></li>
+                    <li className='nav-item'><Link to='/userOrders'>Orders</Link></li>
+                    <li className='nav-item'><Link to ='/adminProducts'>Products (Admin Only)</Link></li>
                 </ul>
             </section>
         </div>

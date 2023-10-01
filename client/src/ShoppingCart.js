@@ -56,9 +56,10 @@ export default function ShoppingCart() {
             const reducedItemIndex = tempCart.findIndex((product) => itemRemoved.product_uuid === product.product_uuid)
             const reducedItem = tempCart[reducedItemIndex];
             const isInt = isWholeNumber(Number(itemRemoved.price))
-            const unitPrice = Number(reducedItem.price) / itemRemoved.quantity;
+            const unitPrice = Number(reducedItem.price) / itemRemoved.quantity; //divide the price by the quantity to get the original cost
             tempCart[reducedItemIndex] = {
-                ...reducedItem, //below math subtracts the current price by the price of one of its items by dividing the price by the quantity to get the original cost.
+                ...reducedItem, 
+                //subtract the current price by the price of one of its items. If its an int, leave as is. If decimal, round
                 price: isInt === true ? Number(reducedItem.price) - unitPrice :  Number(Number(Number(reducedItem.price) - unitPrice).toFixed(2)),
                 quantity: reducedItem.quantity - 1,
             }
@@ -171,8 +172,8 @@ export default function ShoppingCart() {
                                 return <li key={ci.uuid}><CartItem ci={ci} removeFromCart={removeFromCart}/></li>
                             })}
                         </ul>
-                        <span className='order-total'>Total: ${orderTotal}</span>
-                        <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button>
+                        <footer className='cart-footer'>Total: ${orderTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        
                     </section>
                 </div>
             )

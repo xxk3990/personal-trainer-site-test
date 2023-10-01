@@ -44,7 +44,7 @@ button {
 
 .cart-items-list li span, 
 .cart-items-list li button {
-    margin-top: 20px;
+    margin-top: 3%;
 }
 
 .basket {
@@ -67,4 +67,9 @@ button {
 .remove-from-order-btn {
     height: 25px;
     margin-left: 25px;
+}
+
+.cart-footer {
+    display: flex;
+    justify-content: space-around;
 }

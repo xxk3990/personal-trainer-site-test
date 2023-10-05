@@ -12,6 +12,7 @@ const bcrypt = require("bcrypt");
 const { productModel } = require('./product');
 const { orderModel } = require("./order")
 const { orderItemModel } = require("./order-item");
+const { cartItemModel } = require("./cart-item")
 
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   dialect: 'postgres',
@@ -19,9 +20,10 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 })
 
 const models = {
-    Product: productModel(sequelize, Sequelize.DataTypes),
-    Order: orderModel(sequelize, Sequelize.DataTypes),
-    Order_Item: orderItemModel(sequelize, Sequelize.DataTypes)
+  Product: productModel(sequelize, Sequelize.DataTypes),
+  Order: orderModel(sequelize, Sequelize.DataTypes),
+  Order_Item: orderItemModel(sequelize, Sequelize.DataTypes),
+  Cart_Item: cartItemModel(sequelize, Sequelize.DataTypes)
 }
 
 fs

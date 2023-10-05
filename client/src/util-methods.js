@@ -1,4 +1,4 @@
-export const isWholeNumber = (amount) => {
+export const integerTest = (amount) => {
     if(Number.isInteger(amount / 100)) {
         return true;
     } else {

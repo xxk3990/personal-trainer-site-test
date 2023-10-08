@@ -29,12 +29,13 @@ const submitOrder = async (req, res) => { //add transactional integrity
         try {
             models.sequelize.transaction(async() => {
                 orderItems.map(async item => {
-                    return await models.Order_Item.create({
+                    await models.Order_Item.create({
                         uuid: uuidv4(),
                         order_uuid: newOrder.uuid,
                         product_uuid: item.product_uuid,
                         quantity: item.quantity
                     })
+                    await models.Cart_Item.destroy({where: {"product_uuid" : item.product_uuid}})
                 })
                 await models.Order.create(newOrder);
                 return res.status(201).send()

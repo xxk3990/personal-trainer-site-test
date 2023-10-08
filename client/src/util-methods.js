@@ -1,5 +1,5 @@
-export const isWholeNumber = (amount) => {
-    if(Number.isInteger(amount / 100)) {
+export const integerTest = (amount) => {
+    if(Number.isInteger(amount)) {
         return true;
     } else {
         return false;
@@ -7,6 +7,6 @@ export const isWholeNumber = (amount) => {
 }
 
 
-export const addDecimal = (amount) => {
-   return (amount / 100).toFixed(2);
+export const addDecimal = (price) => {
+    return Number(price / 100).toFixed(2);
 }

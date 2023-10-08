@@ -1,6 +1,7 @@
 const product = require('./controllers/products-controller');
 const order = require("./controllers/orders-controller")
 const items = require("./controllers/orderItems-controller")
+const cart = require("./controllers/cartItems-controller")
 
 const router = (app) => {
    // app.post('/login', users.login)
@@ -12,6 +13,10 @@ const router = (app) => {
     //app.get('/allOrders', admin.getAllOrders) not created yet
     app.post('/submitOrder', order.submitOrder)
     app.get('/orderItems', items.getOrderItems);
+    app.get('/cartItems', cart.getCartItems)
+    app.post("/addToCart", cart.createCartItem);
+    app.patch('/updateCartItem', cart.updateCartItem);
+    app.delete("/deleteCartItem", cart.deleteCartItem)
 
 
 }

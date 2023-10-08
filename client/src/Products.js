@@ -3,7 +3,7 @@ import { useState, useEffect} from 'react';
 import { handleGet, handlePost } from './services/requests-service';
 import './styles/products.css';
 import { Snackbar } from '@mui/material';
-import { isWholeNumber, addDecimal } from './util-methods';
+import { integerTest, addDecimal } from './util-methods';
 
 export default function Products() {
     const [products, setProducts] = useState([]);
@@ -14,8 +14,18 @@ export default function Products() {
         price: 0
     })
     const getProducts = async () => {
-        const endpoint = `allProducts`
-        handleGet(endpoint, setProducts)
+        const url = `http://localhost:3000/allProducts`
+        await fetch(url, {
+            method: 'GET',
+        }).then(response => response.json(),
+        []).then(responseData => {
+            if(responseData.length === 0) {
+                setProducts([]);
+            } else {
+                setProducts(responseData); //set it equal to data from API
+            }
+            
+        })
     }
     useEffect(() => {
         document.title = "Admin Products"
@@ -92,7 +102,7 @@ export default function Products() {
 const Product = (props) => {
     const p = props.p;
     const formattedPrice = addDecimal(p.price);
-    const isInt = isWholeNumber(Number(p.price));
+    const isInt = integerTest(Number(p.price));
     const price = isInt === true ? p.price : formattedPrice;
     return (
         <section className="product-info">

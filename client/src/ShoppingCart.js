@@ -1,7 +1,7 @@
 import React  from 'react';
 import { useState, useEffect } from 'react';
-import { handleGet, handlePost } from './services/requests-service';
-import { addDecimal, isWholeNumber } from './util-methods';
+import { handleGet, handlePost, handlePatch, handleDelete } from './services/requests-service';
+import { addDecimal, integerTest } from './util-methods';
 import { Snackbar } from '@mui/material';
 import './styles/shopping-cart.css';
 
@@ -13,78 +13,155 @@ export default function ShoppingCart() {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const getProducts = async () => {
         const endpoint = `allProducts`
-        handleGet(endpoint, setProducts)
+        await handleGet(endpoint, setProducts)
     }
+
+    const getCartItems = async () => {
+        //Couldn't use default request service handleGet method as I also had to calc the order total on load
+        const url = `http://localhost:3000/cartItems`
+        await fetch(url, {
+            method: 'GET',
+        }).then(response => response.json(),
+        []).then(responseData => {
+            if(!responseData.cartItems) {
+                setCartItems([]);
+                setOrderTotal(0);
+            } else {
+                setCartItems(responseData.cartItems); //set it equal to data from API
+                setOrderTotal(Number(responseData.cart_total))
+            }
+            
+        })
+    }
+
+    const updateCartItem = async (item) => {
+        const endpoint = `updateCartItem`
+        const requestBody = {
+            product_uuid: item.product_uuid,
+            quantity: item.quantity,
+            price: Number(item.price)
+        }
+        return await handlePatch(endpoint, requestBody);
+    }
+
+    const deleteCartItem = async(itemToDelete) => {
+        const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
+        return await handleDelete(endpoint)
+    }
+
     useEffect(() => {
         document.title = "Shopping Cart"
         getProducts()
+        getCartItems();
     }, []);
-    const addToCart = (item) => {
-        if(cartItems.length === 0) {
-            setCartItems([...cartItems, item])
-            calcOrderTotal(Number(item.price), "addition", item.quantity);
+    const addToCart = async(item) => {
+        const endpoint = `addToCart`
+        if(cartItems.length === 0) { //if there is nothing in the cart at all
+            const requestBody = {
+                cartItem: item,
+                product_uuid: item.product_uuid,
+                quantity: item.quantity,
+                product_name: item.product_name,
+                price: Number(item.price),
+                image_url: item.image_url
+            }
+            try {
+                const response = await handlePost(endpoint, requestBody)
+                if(response.status === 200 || response.status === 201) {
+                    setCartItems([...cartItems, item])
+                    calcOrderTotal(Number(item.price), "addition");
+                }
+            } catch {
+                alert("An error occurred and the item could not be added.")
+            } 
+            
         } else {
             const tempCart = [...cartItems];
-            const itemIndex = tempCart.findIndex((product) => item.product_uuid === product.product_uuid)
-            if(!tempCart[itemIndex]) {
-                tempCart.push({...item, quantity: item.quantity})
-                calcOrderTotal(Number(item.price), "addition", item.quantity)
-                setCartItems(tempCart)
-            } else {
+            const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
+            if(!tempCart[itemIndex]) { //if it does not exist in the cart items, do POST request
+                const requestBody = {
+                    cartItem: item,
+                    product_uuid: item.product_uuid,
+                    quantity: item.quantity,
+                    product_name: item.product_name,
+                    price: Number(item.price),
+                    image_url: item.image_url
+                }
+                try {
+                    const response = await handlePost(endpoint, requestBody)
+                    if(response.status === 200 || response.status === 201) {
+                        //if cart saving was successful, add to temp cart
+                        tempCart.push({...item, quantity: item.quantity})
+                        calcOrderTotal(Number(item.price), "addition")
+                        setCartItems(tempCart)
+                    }
+                } catch {
+                    alert("An error occurred and the item could not be added.")
+                } 
+            } else { //if it does, do PATCH!
                 const prod = tempCart[itemIndex];
-                const isInt = isWholeNumber(Number(item.price));
+                const isInt = integerTest(Number(item.price));
                 tempCart[itemIndex] = {
                     ...prod, 
-                    quantity: prod.quantity + item.quantity, 
+                    quantity: prod.quantity + 1, 
                     price: isInt === true ? Number(prod.price) + Number(item.price) : Number(Number(Number(prod.price) + Number(item.price)).toFixed(2))
                 }
-                calcOrderTotal(Number(item.price), "addition", item.quantity);
+                calcOrderTotal(Number(item.price), "addition");
                 setCartItems(tempCart);
+                updateCartItem(item)
             }
         }
     }
 
-    const increaseQuantity = (item) => {
+    const increaseQuantity = (itemIncreased) => {
         const tempCart = [...cartItems];
-        const isInt = isWholeNumber(Number(item.price));
-        const itemIndex = tempCart.findIndex((product) => item.product_uuid === product.product_uuid)
+        const isInt = integerTest(Number(itemIncreased.price));
+        const itemIndex = tempCart.findIndex((product) => itemIncreased.product_uuid === product.product_uuid)
         const prod = tempCart[itemIndex];
-        const unitPrice = Number(item.price) / item.quantity;
+        const unitPrice = Number(itemIncreased.price) / itemIncreased.quantity;
         tempCart[itemIndex] = {
             ...prod, 
             quantity: prod.quantity + 1, 
             price: isInt === true ? Number(prod.price) + unitPrice : Number(Number(Number(prod.price) + unitPrice).toFixed(2))
         }
-        calcOrderTotal(unitPrice, "addition", 1);
+        calcOrderTotal(unitPrice, "addition");
         setCartItems(tempCart);
+        updateCartItem(tempCart[itemIndex]);
     }
 
-    const removeFromCart = (itemRemoved) => {
+    const decreaseQuantity = (itemReduced) => {
         const tempCart = [...cartItems];
-        if(itemRemoved.quantity === 1 && itemRemoved.quantity !== 0) { //if going from one to zero, remove completely
-            const filteredCart = tempCart.filter((c) => {
-                return c !== itemRemoved;
-            })
-            setCartItems(filteredCart);
-            calcOrderTotal(Number(itemRemoved.price), "subtraction", itemRemoved.quantity)
+        if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
+            if(cartItems.length === 1) {
+                deleteCartItem(itemReduced);
+                setCartItems([])
+            } else {
+                const filteredCart = tempCart.filter((c) => {
+                    return c !== itemReduced;
+                })
+                setCartItems(filteredCart);
+                calcOrderTotal(Number(itemReduced.price), "subtraction")
+                deleteCartItem(itemReduced);
+            }
         } else { //if quantity is > 1, reduce quantity and decrease price instead
-            const reducedItemIndex = tempCart.findIndex((product) => itemRemoved.product_uuid === product.product_uuid)
+            const reducedItemIndex = tempCart.findIndex((product) => itemReduced.product_uuid === product.product_uuid)
             const reducedItem = tempCart[reducedItemIndex];
-            const isInt = isWholeNumber(Number(itemRemoved.price))
-            const unitPrice = Number(reducedItem.price) / itemRemoved.quantity; //divide the price by the quantity to get the original cost
+            const isInt = integerTest(Number(itemReduced.price))
+            const unitPrice = Number(reducedItem.price) / itemReduced.quantity; //divide the price by the quantity to get the original cost
             tempCart[reducedItemIndex] = {
                 ...reducedItem, 
                 //subtract the current price by the price of one of its items. If its an int, leave as is. If decimal, round
-                price: isInt === true ? Number(reducedItem.price) - unitPrice :  Number(Number(Number(reducedItem.price) - unitPrice).toFixed(2)),
+                price: isInt === true ? Number(reducedItem.price) - unitPrice : Number(Number(Number(reducedItem.price) - unitPrice).toFixed(2)),
                 quantity: reducedItem.quantity - 1,
             }
-            calcOrderTotal(Number(itemRemoved.price), "subtraction", itemRemoved.quantity)
+            calcOrderTotal(unitPrice, "subtraction")
             setCartItems(tempCart)
+            updateCartItem(itemReduced);
         }
         
     }
 
-    const calcOrderTotal = (currentItemPrice, operation, currentItemQuantity) => {
+    const calcOrderTotal = (currentItemPrice, operation) => {
     //first .map is to get just the price prop, second is to convert all values to number (float or int)
         const allPrices = cartItems.map(x => x.price).map(x => Number(x))
         if(operation === "addition") {
@@ -92,18 +169,17 @@ export default function ShoppingCart() {
                 return currentItemPrice + orderTotal;
             }, currentItemPrice)
             console.log(totalCost);
-            const isInt = isWholeNumber(totalCost);
+            const isInt = integerTest(totalCost);
             if(isInt) {
                 return setOrderTotal(totalCost); //if its a whole number, add as is
             } else {
                 return setOrderTotal(Number(Number(totalCost).toFixed(2))); //if decimal, round
             } 
         } else if(operation === "subtraction") {
-            const unitPrice = currentItemPrice / currentItemQuantity;
             const totalCost = allPrices.reduce(() => {
-                return orderTotal - unitPrice
+                return orderTotal - currentItemPrice
             }, orderTotal)
-            const isInt = isWholeNumber(totalCost);
+            const isInt = integerTest(totalCost);
             console.log(totalCost);
             if(isInt) {
                 return setOrderTotal(totalCost); //if its a whole number, add as is
@@ -184,7 +260,7 @@ export default function ShoppingCart() {
                     <section className='basket'>
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
-                                return <li key={ci.uuid}><CartItem ci={ci} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity}/></li>
+                                return <li key={ci.uuid}><CartItem ci={ci} decreaseQuantity={decreaseQuantity} increaseQuantity={increaseQuantity}/></li>
                             })}
                         </ul>
                         <footer className='cart-footer'>Total: ${orderTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
@@ -201,7 +277,7 @@ const Product = (props) => {
     const p = props.p;
     const addToCart = props.addToCart
     const formattedPrice = addDecimal(p.price);
-    const isInt = isWholeNumber(Number(p.price));
+    const isInt = integerTest(p.price);
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
@@ -225,10 +301,12 @@ const Product = (props) => {
 
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
-    const removeFromCart = props.removeFromCart;
+    const decreaseQuantity = props.decreaseQuantity;
     const increaseQuantity = props.increaseQuantity;
+    const formattedPrice = Number(ci.price).toFixed(2);
+    const isInt = integerTest(ci.price)
     const handleRemove = () => {
-        removeFromCart(ci);
+        decreaseQuantity(ci);
     }
     const handleIncrease = () => {
         increaseQuantity(ci);
@@ -238,7 +316,7 @@ const CartItem = (props) => {
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{ci.price}</span>
+            <span>{isInt === true ? ci.price : formattedPrice}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleRemove} title='Decrease to 0 to remove completely.'> – </button>

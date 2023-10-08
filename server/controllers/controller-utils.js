@@ -9,4 +9,16 @@ const removeDecimalIfNeeded = (amount) => {
     }
 }
 
-module.exports = {removeDecimalIfNeeded}
+const addDecimal = (amount) => {
+    return (amount / 100).toFixed(2);
+}
+
+const integerTest = (amount) => {
+    if(Number.isInteger(amount / 100)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+module.exports = {removeDecimalIfNeeded, integerTest, addDecimal}

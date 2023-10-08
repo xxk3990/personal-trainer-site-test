@@ -13,13 +13,25 @@ export default function ShoppingCart() {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const getProducts = async () => {
         const endpoint = `allProducts`
-        handleGet(endpoint, setProducts)
+        await handleGet(endpoint, setProducts)
     }
 
     const getCartItems = async () => {
-        //TODO: FIGURE OUT HOW TO SET THE ORDER TOTAL TO THE TOTAL PRICE OF THE CART ITEMS ON PAGE RELOAD.
-        const endpoint = `cartItems`
-        handleGet(endpoint, setCartItems);
+        //Couldn't use default request service handleGet method as I also had to calc the order total on load
+        const url = `http://localhost:3000/cartItems`
+        await fetch(url, {
+            method: 'GET',
+        }).then(response => response.json(),
+        []).then(responseData => {
+            if(!responseData.cartItems) {
+                setCartItems([]);
+                setOrderTotal(0);
+            } else {
+                setCartItems(responseData.cartItems); //set it equal to data from API
+                setOrderTotal(Number(responseData.cart_total))
+            }
+            
+        })
     }
 
     const updateCartItem = async (item) => {
@@ -33,7 +45,7 @@ export default function ShoppingCart() {
     }
 
     const deleteCartItem = async(itemToDelete) => {
-        const endpoint = `deleteCartItem?item=${itemToDelete.uuid}`;
+        const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
         return await handleDelete(endpoint)
     }
 
@@ -57,7 +69,7 @@ export default function ShoppingCart() {
                 const response = await handlePost(endpoint, requestBody)
                 if(response.status === 200 || response.status === 201) {
                     setCartItems([...cartItems, item])
-                    calcOrderTotal(Number(item.price), "addition", item.quantity);
+                    calcOrderTotal(Number(item.price), "addition");
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
@@ -66,7 +78,7 @@ export default function ShoppingCart() {
         } else {
             const tempCart = [...cartItems];
             const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
-            if(!tempCart[itemIndex]) {
+            if(!tempCart[itemIndex]) { //if it does not exist in the cart items, do POST request
                 const requestBody = {
                     cartItem: item,
                     product_uuid: item.product_uuid,
@@ -80,13 +92,13 @@ export default function ShoppingCart() {
                     if(response.status === 200 || response.status === 201) {
                         //if cart saving was successful, add to temp cart
                         tempCart.push({...item, quantity: item.quantity})
-                        calcOrderTotal(Number(item.price), "addition", item.quantity)
+                        calcOrderTotal(Number(item.price), "addition")
                         setCartItems(tempCart)
                     }
                 } catch {
                     alert("An error occurred and the item could not be added.")
                 } 
-            } else {
+            } else { //if it does, do PATCH!
                 const prod = tempCart[itemIndex];
                 const isInt = integerTest(Number(item.price));
                 tempCart[itemIndex] = {
@@ -101,12 +113,12 @@ export default function ShoppingCart() {
         }
     }
 
-    const increaseQuantity = (item) => {
+    const increaseQuantity = (itemIncreased) => {
         const tempCart = [...cartItems];
-        const isInt = integerTest(Number(item.price));
-        const itemIndex = tempCart.findIndex((product) => item.product_uuid === product.product_uuid)
+        const isInt = integerTest(Number(itemIncreased.price));
+        const itemIndex = tempCart.findIndex((product) => itemIncreased.product_uuid === product.product_uuid)
         const prod = tempCart[itemIndex];
-        const unitPrice = Number(item.price) / item.quantity;
+        const unitPrice = Number(itemIncreased.price) / itemIncreased.quantity;
         tempCart[itemIndex] = {
             ...prod, 
             quantity: prod.quantity + 1, 
@@ -265,7 +277,7 @@ const Product = (props) => {
     const p = props.p;
     const addToCart = props.addToCart
     const formattedPrice = addDecimal(p.price);
-    const isInt = integerTest(Number(p.price));
+    const isInt = integerTest(p.price);
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
@@ -291,6 +303,8 @@ const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
     const decreaseQuantity = props.decreaseQuantity;
     const increaseQuantity = props.increaseQuantity;
+    const formattedPrice = Number(ci.price).toFixed(2);
+    const isInt = integerTest(ci.price)
     const handleRemove = () => {
         decreaseQuantity(ci);
     }
@@ -302,7 +316,7 @@ const CartItem = (props) => {
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{ci.price}</span>
+            <span>{isInt === true ? ci.price : formattedPrice}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleRemove} title='Decrease to 0 to remove completely.'> – </button>

@@ -14,8 +14,18 @@ export default function Products() {
         price: 0
     })
     const getProducts = async () => {
-        const endpoint = `allProducts`
-        handleGet(endpoint, setProducts)
+        const url = `http://localhost:3000/allProducts`
+        await fetch(url, {
+            method: 'GET',
+        }).then(response => response.json(),
+        []).then(responseData => {
+            if(responseData.length === 0) {
+                setProducts([]);
+            } else {
+                setProducts(responseData); //set it equal to data from API
+            }
+            
+        })
     }
     useEffect(() => {
         document.title = "Admin Products"

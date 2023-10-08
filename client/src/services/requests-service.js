@@ -6,7 +6,12 @@ export const handleGet = async (endpoint, setDataInComponent) => {
     }).then(response => response.json(),
     []).then(responseData => {
         //The data for the component is the main setXXX variable (examples: setProducts, setOrders)
-        return setDataInComponent(responseData); //set it equal to data from API
+        if(responseData.length === 0) {
+            return setDataInComponent([])
+        } else {
+            return setDataInComponent(responseData); //set it equal to data from API
+        }
+        
     })
 }
 

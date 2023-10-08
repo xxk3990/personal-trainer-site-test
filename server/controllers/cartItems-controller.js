@@ -6,10 +6,24 @@ const utils = require('./controller-utils')
 
 const getCartItems = async(req, res) => {
     const cartItems = await models.Cart_Item.findAll() //in future add where user_uuid = req.body.userID
-    if(cartItems.length !== 0) {
-        return res.json(cartItems)
+    if(cartItems.length === 0) {
+        return res.send([]);
     } else {
-        return res.json([])
+        cartItems.forEach(ci => {
+            if(!utils.integerTest(ci.price)) { //if it fails the integer test
+                ci.price = Number(utils.addDecimal(ci.price)); //add the decimal point
+            }
+        })
+        const cartPrices = cartItems.map(x => x.price);
+        const cartTotal = cartPrices.reduce((acc, val) => {
+            return acc + val
+        }) //calc total cost of cart
+        const formattedTotal = Number(cartTotal).toFixed(2);
+        const dataForFE = {
+            cartItems: cartItems,
+            cart_total: utils.integerTest(cartTotal) ? cartTotal : formattedTotal
+        }
+        return res.json(dataForFE);
     }
 }
 
@@ -49,7 +63,7 @@ const updateCartItem = async(req, res) => {
 
 const deleteCartItem = async (req, res) => {
     res.status(200).send()
-    return models.Cart_Item.destroy({where: {'uuid':req.query.item}});
+    return models.Cart_Item.destroy({where: {'product_uuid':req.query.product}});
 }
 
 

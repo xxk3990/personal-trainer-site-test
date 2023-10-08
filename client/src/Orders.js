@@ -36,7 +36,7 @@ export default function Orders() {
 const OrderTile = (props) => {
     const odr = props.odr;
     const formattedTotal = addDecimal(odr.order_total)
-    const isInt = integerTest(odr.order_total);
+    const isInt = integerTest(odr.order_total / 100);
     const newTotal = isInt === true ? odr.order_total : formattedTotal
     return (
         <section className='order-info'>

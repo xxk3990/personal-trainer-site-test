@@ -102,7 +102,7 @@ export default function Products() {
 const Product = (props) => {
     const p = props.p;
     const formattedPrice = addDecimal(p.price);
-    const isInt = integerTest(Number(p.price));
+    const isInt = integerTest(Number(p.price / 100));
     const price = isInt === true ? p.price : formattedPrice;
     return (
         <section className="product-info">

@@ -17,10 +17,10 @@ module.exports = {
     "dialect": "postgres"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "database_prod",
+    "username": "postgres",
+    "password": process.env.AWS_DB_PW,
+    "database": "personal_trainer_site",
+    "host": "personal-trainer-site.cg6tsyf9mgr3.us-east-2.rds.amazonaws.com",
     "dialect": "postgres"
   }
 }

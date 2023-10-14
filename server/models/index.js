@@ -3,10 +3,11 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(`${__dirname}/../config/config.js`)[env];
+const environment = 'production';
+//const process = require("process")
+const env = require("../.env")
+const config = require(`${__dirname}/../config/config.js`)[environment];
 const db = {};
 const bcrypt = require("bcrypt");
 const { productModel } = require('./product');
@@ -14,11 +15,24 @@ const { orderModel } = require("./order")
 const { orderItemModel } = require("./order-item");
 const { cartItemModel } = require("./cart-item")
 
+// const sequelizeProps = {
+//   database: environment === "production" ? "personal_trainer_site" : "personal-trainer-site",
+//   username: environment === "production" ? "postgres" : null,
+//   password:
+// }
+// console.log(config);
 const sequelize = new Sequelize(config.database, config.username, config.password, {
+  host: environment === 'production' ? process.env.AWS_HOST : 'localhost',
+  port: 5432,
+  logging: console.log,
   dialect: 'postgres',
-  host: 'localhost',
+  pool: { maxConnections: 5, maxIdleTime: 30},
+  language: 'en',
+  dialectOptions: {
+    ssl: true
+  }
 })
-
+console.log(sequelize)
 const models = {
   Product: productModel(sequelize, Sequelize.DataTypes),
   Order: orderModel(sequelize, Sequelize.DataTypes),

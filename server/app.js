@@ -5,7 +5,8 @@ const cors = require('cors');
 const { expressjwt: jwt } = require("express-jwt");
 const process = require('process')
 const router = require("./router");
-const port = 3000;
+const env = "production"
+const port = env === "production" ? 5432 : 3000;
 
 const app = express();
 app.use(cookieParser());

@@ -14,13 +14,8 @@ const { productModel } = require('./product');
 const { orderModel } = require("./order")
 const { orderItemModel } = require("./order-item");
 const { cartItemModel } = require("./cart-item")
+const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
 
-// const sequelizeProps = {
-//   database: environment === "production" ? "personal_trainer_site" : "personal-trainer-site",
-//   username: environment === "production" ? "postgres" : null,
-//   password:
-// }
-// console.log(config);
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   host: environment === 'production' ? process.env.AWS_HOST : 'localhost',
   port: 5432,
@@ -29,10 +24,13 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   pool: { maxConnections: 5, maxIdleTime: 30},
   language: 'en',
   dialectOptions: {
-    ssl: true
+    ssl: {
+      rejectUnauthorized: true,
+      ca: [rdsCa]
+    }
   }
 })
-console.log(sequelize)
+
 const models = {
   Product: productModel(sequelize, Sequelize.DataTypes),
   Order: orderModel(sequelize, Sequelize.DataTypes),

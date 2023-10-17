@@ -14,7 +14,7 @@ export default function Products() {
         price: 0
     })
     const getProducts = async () => {
-        const url = `http://localhost:3000/allProducts`
+        const url = `allProducts`
         await fetch(url, {
             method: 'GET',
         }).then(response => response.json(),

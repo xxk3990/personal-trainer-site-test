@@ -1,28 +1,28 @@
 {
-  "name": "worldbuildingdb",
+  "name": "trainer-site-shopping-cart",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "nodemon": "nodemon --watch ./server app.js",
-    "test": "node index.js",
-    "start": "nodemon app.js"
+    "nodemon": "nodemon --watch app.js",
+    "test": "node app.js",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xxk3990/stripe-test.git"
+    "url": "git+https://github.com/xxk3990/trainer-site-shopping-cart.git"
   },
   "author": "Xander Kaylan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/xxk3990/worldbuildingdb/issues"
+    "url": "https://github.com/xxk3990/trainer-site-shopping-cart/issues"
   },
-  "homepage": "https://github.com/xxk3990/worldbuildingdb#readme",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.13.5",
     "@types/sequelize": "^4.28.15",
+    "aws-sdk": "^2.1473.0",
     "bcrypt": "^5.0.1",
     "buffer": "^6.0.3",
     "cookie-parser": "^1.4.6",
@@ -31,6 +31,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-generator": "^4.16.1",
     "express-jwt": "^8.4.1",
     "jsonwebtoken": "^9.0.0",
     "nodemon": "^1.14.9",
@@ -48,4 +49,3 @@
     "crypto": false
   }
 }
-

@@ -1,6 +1,6 @@
 import React  from 'react';
 import { useState, useEffect } from 'react';
-import { handleGet, handlePost, handlePatch, handleDelete } from './services/requests-service';
+import { handleGet, handlePost, handlePut, handleDelete } from './services/requests-service';
 import { addDecimal, integerTest } from './util-methods';
 import { Snackbar } from '@mui/material';
 import './styles/shopping-cart.css';
@@ -47,12 +47,10 @@ export default function ShoppingCart() {
     const updateCartItem = async (item) => {
         const endpoint = `updateCartItem`
         const requestBody = {
-            product_uuid: item.product_uuid,
-            quantity: item.quantity,
-            price: item.price
+            item: item
         }
         console.log('updated item price:',item.price);
-        const response = await handlePatch(endpoint, requestBody);
+        const response = await handlePut(endpoint, requestBody);
         if(response.status === 200 || response.status === 201) {
             getCartItems();
         }
@@ -228,7 +226,7 @@ export default function ShoppingCart() {
         const today = new Date();
         const requestBody = {
             cart_items: cartItems,
-            order_date: `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`,
+            order_date: `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`,
             order_total: cartTotal,
         }
         try {

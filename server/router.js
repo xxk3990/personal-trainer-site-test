@@ -15,7 +15,7 @@ const router = (app) => {
     app.get('/orderItems', items.getOrderItems);
     app.get('/cartItems', cart.getCartItems)
     app.post("/addToCart", cart.createCartItem);
-    app.patch('/updateCartItem', cart.updateCartItem);
+    app.put('/updateCartItem', cart.updateCartItem);
     app.delete("/deleteCartItem", cart.deleteCartItem)
 
 

@@ -10,6 +10,7 @@ const userOrders = async (req, res) => {
         orders.forEach(odr => {
             if (!utils.integerTest(odr.order_total)) {
                 const decimalTotal = Number(odr.order_total).toFixed(2);
+                console.log(decimalTotal);
                 const totalSplit = decimalTotal.split(".")
                 if (decimalTotal[decimalTotal.length - 2] === ".") {
                     const zero = 0;

@@ -29,10 +29,10 @@ export const handlePost = async (endpoint, body) => {
     return fetch(url, requestParams)
 }
 
-export const handlePatch = async (endpoint, body) => {
+export const handlePut = async (endpoint, body) => {
     const url = `http://localhost:3000/${endpoint}`;
     const requestParams = {
-        method: "PATCH",
+        method: "PUT",
         headers: {
             "Content-Type": 'application/json',
             //"Authorization": `Bearer ${token}` 

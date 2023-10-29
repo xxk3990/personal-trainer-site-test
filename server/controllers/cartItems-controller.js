@@ -16,7 +16,7 @@ const getCartItems = async (req, res) => {
         })
         const cartInts = cartItems.map(x => x.price).filter(x => utils.integerTest(x)); //get all ints
         const cartDecs = cartItems.map(x => x.price).filter(x => !utils.integerTest(x)); //get all decimals
-   
+
         if (cartInts.length !== 0) {
             const cartIntsTotal = cartInts.reduce((acc, val) => {
                 return acc + val
@@ -28,35 +28,16 @@ const getCartItems = async (req, res) => {
                 console.log("ints:", cartInts);
                 console.log("decs:", cartDecs)
                 if (!utils.integerTest(cartDecsTotal)) {
-                    const checkDecs = Number(cartDecsTotal).toFixed(2)
-                    if (checkDecs[checkDecs.length - 2] === '.') {
-                        console.log("zero check reached")
-                        const split = checkDecs.split(".")
-                        const zero = 0;
-                        const decimalSide = `${split[1]}${zero}`
-                        const parsedTotal = parseFloat(`${split[0]}.${decimalSide}`).toFixed(2);
-                        console.log(parsedTotal)
-                        const dataForFE = {
-                            cart_items: cartItems,
-                            cart_totals: {
-                                ints: cartIntsTotal,
-                                decs: Number(parsedTotal)
-                            }
+                    console.log("total of decimals when ints !== 0:", cartDecsTotal)
+                    const dataForFE = {
+                        cart_items: cartItems,
+                        cart_totals: {
+                            ints: cartIntsTotal,
+                            decs: Number(Number(cartDecsTotal).toFixed(2))
                         }
-                        console.log("cartTotals: ", dataForFE.cart_totals)
-                        return res.json(dataForFE);
-                    } else {
-                        console.log("total of decimals when ints !== 0:", cartDecsTotal)
-                        const dataForFE = {
-                            cart_items: cartItems,
-                            cart_totals: {
-                                ints: cartIntsTotal,
-                                decs: Number(Number(cartDecsTotal).toFixed(2))
-                            }
-                        }
-                        console.log("cartTotals: ",dataForFE.cart_totals)
-                        return res.json(dataForFE);
                     }
+                    console.log("cartTotals: ", dataForFE.cart_totals)
+                    return res.json(dataForFE);
                 }
             } else {
                 const dataForFE = {
@@ -75,38 +56,15 @@ const getCartItems = async (req, res) => {
                     return Number(acc) + Number(val)
                 }, 0)
                 //TODO: FIGURE OUT HOW TO HAVE TOTAL DISPLAY WITH ZERO IF CENTS < 10
-                //TODO: FIGURE OUT WHY ONLY THE FIRST RESULT WITH A DECIMAL IS BEING ADDED.
-                if (!utils.integerTest(cartDecsTotal)) {
-                    const checkDecs = Number(cartDecsTotal).toFixed(2)
-                    if (checkDecs[checkDecs.length - 2] === '.') {
-                        console.log("zero check reached")
-                        const split = checkDecs.split(".")
-                        const zero = 0;
-                        const decimalSide = `${split[1]}${zero}`
-                        const parsedTotal = parseFloat(`${split[0]}.${decimalSide}`).toFixed(2);
-                        console.log(parsedTotal)
-                        const dataForFE = {
-                            cart_items: cartItems,
-                            cart_totals: {
-                                ints: 0,
-                                decs: Number(parsedTotal)
-                            }
-                        }
-                        console.log(dataForFE.cart_totals)
-                        return res.json(dataForFE);
-                    } else {
-                        console.log("dec total with no int: ", cartDecsTotal)
-                        const dataForFE = {
-                            cart_items: cartItems,
-                            cart_totals: {
-                                ints: 0,
-                                decs: Number(cartDecsTotal)
-                            }
-                        }
-                        
-                        return res.json(dataForFE);
+                console.log("dec total with no int: ", cartDecsTotal)
+                const dataForFE = {
+                    cart_items: cartItems,
+                    cart_totals: {
+                        ints: 0,
+                        decs: Number(cartDecsTotal)
                     }
                 }
+                return res.json(dataForFE);
             }
         }
 

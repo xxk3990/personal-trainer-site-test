@@ -31,12 +31,18 @@ export default function ShoppingCart() {
                 const sums = await responseData.cart_totals;
                 const addSums = sums.ints + sums.decs;
                 if(!integerTest(addSums)) {
-                    setCartTotal(Number(Number(addSums).toFixed(2)));
+                    const sumString = Number(addSums).toFixed(2);
+                    const split = sumString.split(".");
+                    if(sumString[sumString.length - 2] === "." ) {
+                        const decimalSide = `${split[1]}${zero}`
+                        const decimalTotal = Number(`${split[0]}.${decimalSide}`).toFixed(2)
+                        setCartTotal(decimalTotal)
+                    } else {
+                        setCartTotal(Number(sumString))
+                    }
                 } else {
                     setCartTotal(addSums);
                 }
-                
-                
                 
                 setCartItems(responseData.cart_items); //set it equal to data from API
             }
@@ -347,7 +353,7 @@ const CartItem = (props) => {
             ci.price = Number(`${split[0]}.${split[1]}`).toFixed(2)
         }
     }
-    const handleRemove = () => {
+    const handleDecrease = () => {
         decreaseQuantity(ci);
     }
     const handleIncrease = () => {
@@ -361,7 +367,7 @@ const CartItem = (props) => {
             <span>{ci.price}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
-                <button type="button" className='item-btn' onClick={handleRemove} title='Decrease to 0 to remove completely.'> – </button>
+                <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>
             </footer>
             
             

@@ -12,6 +12,7 @@ export default function ShoppingCart() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const zero = 0;
+    
     const getProducts = async () => {
         const endpoint = `allProducts`
         await handleGet(endpoint, setProducts)
@@ -93,7 +94,6 @@ export default function ShoppingCart() {
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
-            
         } else {
             const tempCart = [...cartItems];
             const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
@@ -202,7 +202,6 @@ export default function ShoppingCart() {
                     console.log(decimalTotal)
                     return setCartTotal(Number(decimalTotal)); //if decimal, round
                 }
-                
             } 
         } else if(operation === "subtraction") {
             const totalCost = allPrices.reduce(() => {
@@ -369,8 +368,6 @@ const CartItem = (props) => {
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>
             </footer>
-            
-            
         </section>
     )
 }

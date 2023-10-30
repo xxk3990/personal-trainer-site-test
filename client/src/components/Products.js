@@ -1,9 +1,9 @@
 import React  from 'react';
 import { useState, useEffect} from 'react';
-import { handleGet, handlePost } from './services/requests-service';
-import './styles/products.css';
+import { handleGet, handlePost } from '../services/requests-service';
+import '../styles/products.css';
 import { Snackbar } from '@mui/material';
-import { integerTest, addDecimal } from './util-methods';
+import { integerTest, addDecimal } from '../util-methods';
 
 export default function Products() {
     const [products, setProducts] = useState([]);
@@ -91,14 +91,12 @@ export default function Products() {
 
 const Product = (props) => {
     const p = props.p;
-    const formattedPrice = addDecimal(p.price);
-    const isInt = integerTest(Number(p.price / 100));
-    const price = isInt === true ? p.price : formattedPrice;
+    const isInt = integerTest(Number(p.price));
     return (
         <section className="product-info">
             <h3 id="productname">{p.product_name}</h3>
             <img className="product-list-img" src = {p.image_url} alt = {p.product_name}/>
-            <p>${price}</p>
+            <p>${!isInt ? addDecimal(p.price) : p.price}</p>
         </section>
     )
 }

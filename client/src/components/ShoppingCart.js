@@ -1,9 +1,9 @@
 import React  from 'react';
 import { useState, useEffect } from 'react';
-import { handleGet, handlePost, handlePut, handleDelete } from './services/requests-service';
-import { addDecimal, integerTest } from './util-methods';
+import { handleGet, handlePost, handlePut, handleDelete } from '../services/requests-service'
+import { addDecimal, integerTest } from '../util-methods';
 import { Snackbar } from '@mui/material';
-import './styles/shopping-cart.css';
+import '../styles/shopping-cart.css';
 
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
@@ -37,19 +37,42 @@ export default function ShoppingCart() {
 
     const updateCartItem = async (item) => {
         const endpoint = `updateCartItem`
-        const requestBody = {
-            item: item
+        console.log(item)
+        if(!integerTest(item.price)) {
+            const requestBody = {
+                item: item,
+                price: parseFloat(item.price).toFixed(2)
+            }
+            console.log('updated item price:',item.price);
+            const response = await handlePut(endpoint, requestBody);
+            if(response.status === 200 || response.status === 201) {
+                getCartItems();
+            }
+        } else {
+            const requestBody = {
+                item: item,
+                price: item.price
+            }
+            console.log('updated item price:',item.price);
+            const response = await handlePut(endpoint, requestBody);
+            if(response.status === 200 || response.status === 201) {
+                getCartItems();
+            }
         }
-        console.log('updated item price:',item.price);
-        const response = await handlePut(endpoint, requestBody);
-        if(response.status === 200 || response.status === 201) {
-            getCartItems();
-        }
+        
     }
 
     const deleteCartItem = async(itemToDelete) => {
         const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
-        return await handleDelete(endpoint)
+        await handleDelete(endpoint)
+        getCartItems();
+    }
+
+    const calcUnitPrice = (price, quantity) => { 
+        //had to calc it so many times I figured a method was cleaner
+        if(!integerTest(price)) {
+            return Number(parseFloat(price / quantity).toFixed(2))
+        } else return price / quantity;
     }
 
     useEffect(() => {
@@ -60,11 +83,10 @@ export default function ShoppingCart() {
 
 
     const addItem = async(item) => {
-        //TODO: GET DECIMAL TO ADD TO EXISTING INT AND VICE VERSA. NEARLY THERE!
         const endpoint = `addToCart`
         const tempCart = [...cartItems];
         const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
-        if(!tempCart[itemIndex]) { //if it does not exist in the cart items, do POST request
+        if(itemIndex === -1) { //if it does not exist in the cart items, do POST request
             const requestBody = {
                 cartItem: item,
                 product_uuid: item.product_uuid,
@@ -73,33 +95,36 @@ export default function ShoppingCart() {
                 price: item.price,
                 image_url: item.image_url
             }
+            console.log("new item price:", item.price);
             try {
                 const response = await handlePost(endpoint, requestBody)
                 if(response.status === 200 || response.status === 201) {
+                    const data = await response.json();
+                    console.log()
                     //if cart saving was successful, add to temp cart
-                    tempCart.push({...item, price: item.price, quantity: item.quantity})
-                    setCartTotal(item.price)
+                    tempCart.push({...item, quantity: data.quantity})
                     setCartItems(tempCart)
-                    calcCartTotal();
+                    getCartItems()
+                    calcCartTotal()
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
         } else { //if it does, update quantity and price and call put method only
             const prod = tempCart[itemIndex];
-            const unitPrice = prod.price / item.quantity
+            const unitPrice = calcUnitPrice(prod.price, item.quantity)
             tempCart[itemIndex] = {
                 ...prod, 
                 quantity: prod.quantity + 1,
                 price: prod.price + unitPrice
             }
             setCartItems(tempCart);
-            calcCartTotal();
+            calcCartTotal()
             updateCartItem(tempCart[itemIndex])
         }
     }
 
-    const decreaseQuantity = (itemReduced) => {
+    const decreaseItem = (itemReduced) => {
         const tempCart = [...cartItems];
         if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
             if(cartItems.length === 1) {
@@ -117,7 +142,7 @@ export default function ShoppingCart() {
         } else { //if quantity is > 1, reduce quantity and decrease price instead
             const reducedItemIndex = tempCart.findIndex((product) => itemReduced.product_uuid === product.product_uuid)
             const reducedItem = tempCart[reducedItemIndex];
-            const unitPrice = reducedItem.price / itemReduced.quantity; //divide the price by the quantity to get the original cost
+            const unitPrice = calcUnitPrice(reducedItem.price, itemReduced.quantity) //divide the price by the quantity to get the original cost
             tempCart[reducedItemIndex] = {
                 ...reducedItem, 
                 //subtract the current price by the price of one of its items. If its an int, leave as is. If decimal, round
@@ -132,10 +157,15 @@ export default function ShoppingCart() {
     }
 
     const calcCartTotal = () => {
+        //TODO: FIGURE OUT WHY THE INTS ARE BEING / 100, SHOULD ONLY HAPPEN TO FLOATS
         return cartItems.map(item => {
-            let total = cartTotal;
-            const unitPrice = item.price / item.quantity
-            total += (item.quantity * unitPrice)
+            let total = 0;
+            const unitPrice = calcUnitPrice(item.price, item.quantity)
+            if(!integerTest(total)) {
+                total += Number(Number(item.quantity * unitPrice).toFixed(2))
+            } else {
+                total += (item.quantity * unitPrice)
+            }
             console.log("subtotal: ", total)
             return setCartTotal(total)
         })  
@@ -212,10 +242,11 @@ export default function ShoppingCart() {
                     <section className='basket'>
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
-                                return <li key={ci.uuid}><CartItem ci={ci} decreaseQuantity={decreaseQuantity} addItem={addItem}/></li>
+                                console.log("cartTotal:", cartTotal);
+                                return <li key={ci.uuid}><CartItem ci={ci} decreaseItem={decreaseItem} addItem={addItem}/></li>
                             })}
                         </ul>
-                        <footer className='cart-footer'>Total: ${!integerTest(cartTotal) ? addDecimal(cartTotal) : cartTotal } <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        <footer className='cart-footer'>Total: ${!integerTest(cartTotal) ? addDecimal(cartTotal / 100) : cartTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
                         
                     </section>
                 </div>
@@ -232,7 +263,7 @@ const Product = (props) => {
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
-        price: p.price,
+        price: !isInt ? parseFloat(addDecimal(p.price / 100)) : p.price,
         image_url: p.image_url,
         quantity: 1
     }
@@ -243,7 +274,7 @@ const Product = (props) => {
     return (
         <section className="product-info">
           <h3 id="productname">{p.product_name}</h3>
-          <p>${!isInt ? addDecimal(p.price) : p.price}</p>
+          <p>${!isInt ? addDecimal(p.price / 100) : p.price}</p>
           <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
           <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
         </section>
@@ -252,11 +283,15 @@ const Product = (props) => {
 
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
-    const decreaseQuantity = props.decreaseQuantity;
+    const decreaseItem = props.decreaseItem;
     const addItem = props.addItem;
-    const isInt = integerTest(ci.price)
+    const isInt = integerTest(ci.price);
+    const formattedPrice = Number(addDecimal(ci.price / 100));
+    if(!isInt) {
+        ci.price = formattedPrice;
+    }
     const handleDecrease = () => {
-        decreaseQuantity(ci);
+        decreaseItem(ci);
     }
     const handleIncrease = () => {
         addItem(ci);

@@ -11,7 +11,6 @@ export default function ShoppingCart() {
     const [cartTotal, setCartTotal] = useState(0)
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const zero = 0;
     
     const getProducts = async () => {
         const endpoint = `allProducts`
@@ -24,28 +23,13 @@ export default function ShoppingCart() {
         await fetch(url, {
             method: 'GET',
         }).then(response => response.json(),
-        []).then(async responseData => {
+        []).then(responseData => {
             if(!responseData.cart_items) {
-                setCartItems([]);
-                setCartTotal(0);
+                setCartTotal(0)
+                setCartItems([]); 
             } else {
-                const sums = await responseData.cart_totals;
-                const addSums = sums.ints + sums.decs;
-                if(!integerTest(addSums)) {
-                    const sumString = Number(addSums).toFixed(2);
-                    const split = sumString.split(".");
-                    if(sumString[sumString.length - 2] === "." ) {
-                        const decimalSide = `${split[1]}${zero}`
-                        const decimalTotal = Number(`${split[0]}.${decimalSide}`).toFixed(2)
-                        setCartTotal(decimalTotal)
-                    } else {
-                        setCartTotal(Number(sumString))
-                    }
-                } else {
-                    setCartTotal(addSums);
-                }
-                
-                setCartItems(responseData.cart_items); //set it equal to data from API
+                setCartTotal(responseData.cart_total)
+                setCartItems(responseData.cart_items) //set it equal to data from API
             }
             
         })
@@ -74,78 +58,45 @@ export default function ShoppingCart() {
         getCartItems();
     }, []);
 
-    const addToCart = async(item) => {
+
+    const addItem = async(item) => {
+        //TODO: GET DECIMAL TO ADD TO EXISTING INT AND VICE VERSA. NEARLY THERE!
         const endpoint = `addToCart`
-        if(cartItems.length === 0) { //if there is nothing in the cart at all
+        const tempCart = [...cartItems];
+        const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
+        if(!tempCart[itemIndex]) { //if it does not exist in the cart items, do POST request
             const requestBody = {
                 cartItem: item,
                 product_uuid: item.product_uuid,
                 quantity: item.quantity,
                 product_name: item.product_name,
-                price: Number(item.price),
+                price: item.price,
                 image_url: item.image_url
             }
             try {
                 const response = await handlePost(endpoint, requestBody)
                 if(response.status === 200 || response.status === 201) {
-                    setCartItems([...cartItems, item])
-                    calcCartTotal(Number(item.price), "addition");
+                    //if cart saving was successful, add to temp cart
+                    tempCart.push({...item, price: item.price, quantity: item.quantity})
+                    setCartTotal(item.price)
+                    setCartItems(tempCart)
+                    calcCartTotal();
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
-        } else {
-            const tempCart = [...cartItems];
-            const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
-            if(itemIndex === -1) { //if it does not exist in the cart items, do POST request
-                const requestBody = {
-                    cartItem: item,
-                    product_uuid: item.product_uuid,
-                    quantity: item.quantity,
-                    product_name: item.product_name,
-                    price: Number(item.price),
-                    image_url: item.image_url
-                }
-                try {
-                    const response = await handlePost(endpoint, requestBody)
-                    if(response.status === 200 || response.status === 201) {
-                        //if cart saving was successful, add to temp cart
-                        tempCart.push({...item, quantity: item.quantity})
-                        calcCartTotal(Number(item.price), "addition")
-                        setCartItems(tempCart)
-                    }
-                } catch {
-                    alert("An error occurred and the item could not be added.")
-                } 
-            } else { //if it does, update quantity and price and call patch method only
-                const prod = tempCart[itemIndex];
-                const isInt = integerTest(item.price);
-                tempCart[itemIndex] = {
-                    ...prod, 
-                    quantity: prod.quantity + item.quantity,
-                    price: isInt === true ? Number(prod.price) + Number(item.price) : Number(Number(Number(prod.price) + Number(item.price)).toFixed(2))
-                }
-                calcCartTotal(Number(item.price), "addition");
-                setCartItems(tempCart);
-                updateCartItem(tempCart[itemIndex])
+        } else { //if it does, update quantity and price and call put method only
+            const prod = tempCart[itemIndex];
+            const unitPrice = prod.price / item.quantity
+            tempCart[itemIndex] = {
+                ...prod, 
+                quantity: prod.quantity + 1,
+                price: prod.price + unitPrice
             }
+            setCartItems(tempCart);
+            calcCartTotal();
+            updateCartItem(tempCart[itemIndex])
         }
-    }
-
-    const increaseQuantity = (itemIncreased) => {
-        const tempCart = [...cartItems];
-        const isInt = integerTest(itemIncreased.price);
-        const itemIndex = tempCart.findIndex((product) => itemIncreased.product_uuid === product.product_uuid)
-        const prod = tempCart[itemIndex];
-        const unitPrice = Number(prod.price) / itemIncreased.quantity;
-        tempCart[itemIndex] = {
-            ...prod, 
-            price: isInt === true ? Number(prod.price) + unitPrice : Number(Number(Number(prod.price) + unitPrice).toFixed(2)),
-            quantity: prod.quantity + 1
-        }
-        calcCartTotal(unitPrice, "addition");
-        setCartItems(tempCart);
-        updateCartItem(tempCart[itemIndex]);
     }
 
     const decreaseQuantity = (itemReduced) => {
@@ -154,76 +105,40 @@ export default function ShoppingCart() {
             if(cartItems.length === 1) {
                 deleteCartItem(itemReduced);
                 setCartItems([])
+                setCartTotal(0);
             } else {
                 const filteredCart = tempCart.filter((c) => {
                     return c !== itemReduced;
                 })
                 setCartItems(filteredCart);
-                calcCartTotal(Number(itemReduced.price), "subtraction")
+                calcCartTotal()
                 deleteCartItem(itemReduced);
             }
         } else { //if quantity is > 1, reduce quantity and decrease price instead
             const reducedItemIndex = tempCart.findIndex((product) => itemReduced.product_uuid === product.product_uuid)
             const reducedItem = tempCart[reducedItemIndex];
-            const isInt = integerTest(itemReduced.price)
-            const unitPrice = Number(reducedItem.price) / itemReduced.quantity; //divide the price by the quantity to get the original cost
+            const unitPrice = reducedItem.price / itemReduced.quantity; //divide the price by the quantity to get the original cost
             tempCart[reducedItemIndex] = {
                 ...reducedItem, 
                 //subtract the current price by the price of one of its items. If its an int, leave as is. If decimal, round
-                price: isInt === true ? Number(reducedItem.price) - unitPrice : Number(Number(Number(reducedItem.price) - unitPrice).toFixed(2)),
+                price: reducedItem.price - unitPrice,
                 quantity: reducedItem.quantity - 1,
             }
-            calcCartTotal(unitPrice, "subtraction")
+            calcCartTotal()
             setCartItems(tempCart)
             updateCartItem(tempCart[reducedItemIndex]);
         }
         
     }
 
-    const calcCartTotal = (currentItemPrice, operation) => {
-    //first .map is to get just the price prop, second is to convert all values to number (float or int)
-        const allPrices = cartItems.map(x => x.price).map(x => Number(x))
-        if(operation === "addition") {
-            const totalCost = allPrices.reduce(() => {
-                return currentItemPrice + cartTotal;
-            }, currentItemPrice)
-            console.log(totalCost);
-            if(integerTest(totalCost)) {
-                return setCartTotal(totalCost); //if its a whole number, add as is
-            } else {
-                const totalString = totalCost.toString();
-                const totalSplit = totalString.split(".")
-                if(totalString[totalString.length - 2] === ".") { //add zero to cents if it is less than ten
-                    const decimalSide = `${totalSplit[1]}${zero}`
-                    const decimalTotal = Number(`${totalSplit[0]}.${decimalSide}`).toFixed(2)
-                    return setCartTotal(decimalTotal)
-                } else {
-                    const decimalTotal = Number(totalCost).toFixed(2)
-                    console.log(decimalTotal)
-                    return setCartTotal(Number(decimalTotal)); //if decimal, round
-                }
-            } 
-        } else if(operation === "subtraction") {
-            const totalCost = allPrices.reduce(() => {
-                return cartTotal - currentItemPrice
-            }, cartTotal)
-            console.log(totalCost);
-            if(integerTest(totalCost)) {
-                return setCartTotal(totalCost); //if its a whole number, add as is
-            } else {
-                const totalString = totalCost.toString();
-                const totalSplit = totalString.split(".")
-                if(totalString[totalString.length - 2] === ".") { //add zero to cents if it is less than ten
-                    const decimalSide = `${totalSplit[1]}${zero}`
-                    const newFloat = Number(`${totalSplit[0]}.${decimalSide}`).toFixed(2)
-                    return setCartTotal(Number(newFloat))
-                } else {
-                    const decimalTotal = Number(totalCost).toFixed(2)
-                    return setCartTotal(Number(decimalTotal)); //if decimal, round
-                }
-                
-            }
-        }
+    const calcCartTotal = () => {
+        return cartItems.map(item => {
+            let total = cartTotal;
+            const unitPrice = item.price / item.quantity
+            total += (item.quantity * unitPrice)
+            console.log("subtotal: ", total)
+            return setCartTotal(total)
+        })  
     }
 
     const submitOrder = async() => {
@@ -273,7 +188,7 @@ export default function ShoppingCart() {
                         return (
                             <section className='product-details'>
                             {/* give props and add to cart method to specific product */}
-                                <Product p={p} addToCart={addToCart}/> 
+                                <Product p={p} addItem={addItem}/> 
                             </section>
                         )
                     })}
@@ -289,7 +204,7 @@ export default function ShoppingCart() {
                         {products.map(p => {
                             return (
                                 <section className='product-details'>
-                                    <Product p={p} addToCart={addToCart}/>
+                                    <Product p={p} addItem={addItem}/>
                                 </section>
                             )
                         })}
@@ -297,10 +212,10 @@ export default function ShoppingCart() {
                     <section className='basket'>
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
-                                return <li key={ci.uuid}><CartItem ci={ci} decreaseQuantity={decreaseQuantity} increaseQuantity={increaseQuantity}/></li>
+                                return <li key={ci.uuid}><CartItem ci={ci} decreaseQuantity={decreaseQuantity} addItem={addItem}/></li>
                             })}
                         </ul>
-                        <footer className='cart-footer'>Total: ${cartTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        <footer className='cart-footer'>Total: ${!integerTest(cartTotal) ? addDecimal(cartTotal) : cartTotal } <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
                         
                     </section>
                 </div>
@@ -312,24 +227,23 @@ export default function ShoppingCart() {
 
 const Product = (props) => {
     const p = props.p;
-    const addToCart = props.addToCart
-    const isInt = integerTest(p.price);
-    const formattedPrice = addDecimal(p.price);
+    const addItem = props.addItem;
+    const isInt = integerTest(p.price)
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
-        price: isInt === true ? p.price : formattedPrice,
+        price: p.price,
         image_url: p.image_url,
         quantity: 1
     }
     const handleClick = () => {
         //call parent "add to cart" method with child's unique product info
-        addToCart(item);
+        addItem(item);
     }
     return (
         <section className="product-info">
           <h3 id="productname">{p.product_name}</h3>
-          <p>${item.price}</p>
+          <p>${!isInt ? addDecimal(p.price) : p.price}</p>
           <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
           <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
         </section>
@@ -339,31 +253,20 @@ const Product = (props) => {
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
     const decreaseQuantity = props.decreaseQuantity;
-    const increaseQuantity = props.increaseQuantity;
+    const addItem = props.addItem;
     const isInt = integerTest(ci.price)
-    const zero = 0;
-    if(!isInt) {
-        const stringPrice = ci.price.toString();
-        const split = stringPrice.split('.')
-        if(stringPrice[stringPrice.length - 2] === ".") {
-            split[1] = `${split[1]}${zero}`
-            ci.price = parseFloat(`${split[0]}.${split[1]}`).toFixed(2)
-        } else {
-            ci.price = Number(`${split[0]}.${split[1]}`).toFixed(2)
-        }
-    }
     const handleDecrease = () => {
         decreaseQuantity(ci);
     }
     const handleIncrease = () => {
-        increaseQuantity(ci);
+        addItem(ci);
     }
     return (
         <section className='cart-item-li'>
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{ci.price}</span>
+            <span>{!isInt ? addDecimal(ci.price) : ci.price}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>

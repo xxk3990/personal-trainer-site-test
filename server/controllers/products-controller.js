@@ -7,11 +7,6 @@ const utils = require('./controller-utils')
 const getProducts = async (req, res) => { 
     const products = await models.Product.findAll();
     if(products.length !== 0) {
-        products.forEach(prod => {
-            if(!utils.integerTest(prod.price)) {
-                prod.price = Number(prod.price).toFixed(2);
-            }
-        })
         return res.json(products)
     } else {
         return res.send([]) //send empty response so front-end can check if products.length === 0

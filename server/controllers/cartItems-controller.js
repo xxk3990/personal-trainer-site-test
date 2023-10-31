@@ -6,69 +6,30 @@ const utils = require('./controller-utils')
 
 const getCartItems = async (req, res) => {
     const cartItems = await models.Cart_Item.findAll() //in future add where user_uuid = req.body.userID
-    if (cartItems.length === 0) {
-        return res.send([]);
-    } else {
+    if (cartItems.length !== 0) {
         cartItems.forEach(ci => {
             if (!utils.integerTest(ci.price)) { //if it fails the integer test
-                ci.price = utils.addDecimal(ci.price); //add the decimal
+                ci.price = Number(utils.addDecimal(ci.price))
             }
         })
-        const cartInts = cartItems.map(x => x.price).filter(x => utils.integerTest(x)); //get all ints
-        const cartDecs = cartItems.map(x => x.price).filter(x => !utils.integerTest(x)); //get all decimals
-
-        if (cartInts.length !== 0) {
-            const cartIntsTotal = cartInts.reduce((acc, val) => {
-                return acc + val
-            }, 0) //calc total cost of cart
-            if (cartDecs.length !== 0) {
-                const cartDecsTotal = cartDecs.reduce((acc, val) => {
-                    return Number(acc) + Number(val)
-                }, 0)
-                console.log("ints:", cartInts);
-                console.log("decs:", cartDecs)
-                if (!utils.integerTest(cartDecsTotal)) {
-                    console.log("total of decimals when ints !== 0:", cartDecsTotal)
-                    const dataForFE = {
-                        cart_items: cartItems,
-                        cart_totals: {
-                            ints: cartIntsTotal,
-                            decs: Number(Number(cartDecsTotal).toFixed(2))
-                        }
-                    }
-                    console.log("cartTotals: ", dataForFE.cart_totals)
-                    return res.json(dataForFE);
-                }
-            } else {
-                const dataForFE = {
-                    cart_items: cartItems,
-                    cart_totals: {
-                        ints: cartIntsTotal,
-                        decs: 0
-                    }
-                }
-                console.log(dataForFE.cart_totals)
-                return res.json(dataForFE);
-            }
-        } else {
-            if (cartDecs.length !== 0) {
-                const cartDecsTotal = cartDecs.reduce((acc, val) => {
-                    return Number(acc) + Number(val)
-                }, 0)
-                //TODO: FIGURE OUT HOW TO HAVE TOTAL DISPLAY WITH ZERO IF CENTS < 10
-                console.log("dec total with no int: ", cartDecsTotal)
-                const dataForFE = {
-                    cart_items: cartItems,
-                    cart_totals: {
-                        ints: 0,
-                        decs: Number(cartDecsTotal)
-                    }
-                }
-                return res.json(dataForFE);
-            }
+        const allPrices = cartItems.map(x => x.price)
+        const cartInts = allPrices.filter(x => utils.integerTest(x));
+        const cartDecs = allPrices.filter(x => !utils.integerTest(x));
+        console.log("allPrices before reduce:", allPrices)
+        const cartIntsTotal = cartInts.reduce((acc, val) => {
+            return acc + val
+        }, 0)
+        const cartDecsTotal = cartDecs.reduce((acc, val) => {
+            return acc + val
+        }, 0)
+        const dataForFE = {
+            cart_items: cartItems,
+            cart_total: cartIntsTotal + cartDecsTotal,
         }
-
-
+        console.log("cart_total:", dataForFE.cart_total)
+        return res.json(dataForFE)
+    } else {
+        return res.send([])
     }
 }
 
@@ -77,19 +38,22 @@ const createCartItem = async (req, res) => {
     if (!cartItem) {
         return res.status(400).send()
     } else {
-        const formattedPrice = utils.removeDecimalIfNeeded(req.body.price)
+        const priceAsInt = utils.removeDecimalIfNeeded(req.body.price)
         const newCartItem = {
             //uuid, product_name, quantity, product_uuid, price, and image_url
             uuid: uuidv4(),
             product_name: req.body.product_name,
             quantity: req.body.quantity,
             product_uuid: req.body.product_uuid,
-            price: formattedPrice,
+            price: priceAsInt,
             image_url: req.body.image_url,
-
+        }
+        const dataForFE = {
+            price: priceAsInt,
+            quantity: req.body.quantity
         }
         await models.Cart_Item.create(newCartItem)
-        return res.status(200).send();
+        return res.status(200).send(dataForFE);
     }
 }
 
@@ -99,28 +63,18 @@ const updateCartItem = async (req, res, next) => {
             "product_uuid": req.body.item.product_uuid
         }
     })
-
     if (itemToUpdate.length === 0) {
         return res.status(304).send() //send "Not Modified" status code to FE
     } else {
         try {
             const item = req.body.item;
+            const priceAsInt = utils.removeDecimalIfNeeded(req.body.price)
             itemToUpdate.quantity = item.quantity;
-            const priceString = item.price.toString();
-            if (priceString[priceString.length - 2] === ".") { //if it needs to have a zero
-                const priceSplit = priceString.split(".");
-                const zero = 0;
-                const decimalSide = `${priceSplit[1]}${zero}`
-                const parseWithZero = parseFloat(`${priceSplit[0]}.${decimalSide}`).toFixed(2);
-                // console.log("with zero:",parseWithZero)
-                //save it with the zero so the decimal location is accurate (ex: 199.90 would be 19.99 without it)
-                itemToUpdate.price = utils.removeDecimalIfNeeded(parseWithZero);
-            } else {
-                itemToUpdate.price = utils.removeDecimalIfNeeded(item.price)
-            }
+            itemToUpdate.price = !utils.integerTest(req.body.price) ? priceAsInt : item.price;
             await itemToUpdate.save();
             return res.status(200).send()
         } catch (error) {
+            console.log("PUT error: ",error)
             next(error)
         }
     }

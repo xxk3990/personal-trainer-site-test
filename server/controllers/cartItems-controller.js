@@ -9,7 +9,7 @@ const getCartItems = async (req, res) => {
     if (cartItems.length !== 0) {
         cartItems.forEach(ci => {
             if (!utils.integerTest(ci.price)) { //if it fails the integer test
-                ci.price = parseFloat(utils.addDecimal(ci.price));
+                ci.price = Number(utils.addDecimal(ci.price))
             }
         })
         const allPrices = cartItems.map(x => x.price)
@@ -21,7 +21,7 @@ const getCartItems = async (req, res) => {
         }, 0)
         const cartDecsTotal = cartDecs.reduce((acc, val) => {
             return acc + val
-        }, 0) //calc total cost of 
+        }, 0)
         const dataForFE = {
             cart_items: cartItems,
             cart_total: cartIntsTotal + cartDecsTotal,

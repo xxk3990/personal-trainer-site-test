@@ -68,12 +68,7 @@ export default function ShoppingCart() {
         getCartItems();
     }
 
-    const calcUnitPrice = (price, quantity) => { 
-        //had to calc it so many times I figured a method was cleaner
-        if(!integerTest(price)) {
-            return Number(parseFloat(price / quantity).toFixed(2))
-        } else return price / quantity;
-    }
+    const calcUnitPrice = (price, quantity) => price / quantity;
 
     useEffect(() => {
         document.title = "Shopping Cart"
@@ -101,25 +96,29 @@ export default function ShoppingCart() {
                 if(response.status === 200 || response.status === 201) {
                     const data = await response.json();
                     console.log()
-                    //if cart saving was successful, add to temp cart
-                    tempCart.push({...item, quantity: data.quantity})
-                    setCartItems(tempCart)
+                    if(cartItems.length === 0) {
+                        setCartItems([...cartItems, item])
+                    } else {
+                        tempCart.push({...item, quantity: item.quantity})
+                        setCartItems(tempCart)
+                    }
+                    
                     getCartItems()
-                   // calcCartTotal("+")
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
         } else { //if it does, update quantity and price and call put method only
             const prod = tempCart[itemIndex];
-            const unitPrice = calcUnitPrice(prod.price, item.quantity)
+            console.log("PUT code hit")
+            const unitPrice = calcUnitPrice(prod.price, prod.quantity)
+            console.log("PUT Unit price:", unitPrice)
             tempCart[itemIndex] = {
                 ...prod, 
                 quantity: prod.quantity + 1,
                 price: prod.price + unitPrice
             }
             setCartItems(tempCart);
-           // calcCartTotal("+")
             updateCartItem(tempCart[itemIndex])
         }
     }
@@ -136,7 +135,6 @@ export default function ShoppingCart() {
                     return c !== itemReduced;
                 })
                 setCartItems(filteredCart);
-                //calcCartTotal("-")
                 deleteCartItem(itemReduced);
             }
         } else { //if quantity is > 1, reduce quantity and decrease price instead
@@ -149,48 +147,11 @@ export default function ShoppingCart() {
                 price: reducedItem.price - unitPrice,
                 quantity: reducedItem.quantity - 1,
             }
-          // calcCartTotal("+")
             setCartItems(tempCart)
             updateCartItem(tempCart[reducedItemIndex]);
         }
         
     }
-
-    // const calcCartTotal = (operation) => {
-    //     //TODO: FIGURE OUT WHY THE INTS ARE BEING / 100, SHOULD ONLY HAPPEN TO FLOATS
-    //     const allPrices = cartItems.map(x => x.price)
-    //     console.log("prices", allPrices)
-    //     return cartItems.map(item => {
-    //         switch (operation) {
-    //             case "+": { //addition
-    //                 const unitPrice = calcUnitPrice(item.price, item.quantity)
-    //                 const total = allPrices.reduce(() => {
-    //                     return cartTotal + unitPrice
-    //                 }, cartTotal)
-    //                 console.log("subtotal: ", total)
-    //                 if(!integerTest(total)) {
-    //                     return setCartTotal(addDecimal(total))
-    //                 } else {
-    //                     return setCartTotal(total)
-    //                 }
-    //             } 
-    //             case "-": { //subtraction
-    //                 const unitPrice = calcUnitPrice(item.price, item.quantity)
-    //                 const total = allPrices.reduce(() => {
-    //                     return cartTotal + unitPrice
-    //                 }, item.price)
-    //                 console.log("subtotal: ", total)
-    //                 if(!integerTest(total)) {
-    //                     return setCartTotal(addDecimal(total))
-    //                 } else {
-    //                     return setCartTotal(total)
-    //                 }
-    //             }
-    //             default: break;
-    //         }
-    //         return;
-    //     })  
-    // }
 
     const submitOrder = async() => {
         const endpoint = `submitOrder`;
@@ -307,7 +268,7 @@ const CartItem = (props) => {
     const decreaseItem = props.decreaseItem;
     const addItem = props.addItem;
     const isInt = integerTest(ci.price);
-    const formattedPrice = Number(Number(ci.price).toFixed(2))
+    const formattedPrice = parseFloat(Number(ci.price).toFixed(2))
     if(!isInt) {
         ci.price = formattedPrice;
     }
@@ -322,7 +283,7 @@ const CartItem = (props) => {
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{!isInt ? ci.price : ci.price}</span>
+            <span>{!isInt ? Number(ci.price).toFixed(2) : ci.price}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>

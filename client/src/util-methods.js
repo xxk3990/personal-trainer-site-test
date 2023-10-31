@@ -7,6 +7,6 @@ export const integerTest = (amount) => {
 }
 
 export const addDecimal = (price) => {
-    return (price).toFixed(2);
+    return Number(price / 100).toFixed(2);
 }
 

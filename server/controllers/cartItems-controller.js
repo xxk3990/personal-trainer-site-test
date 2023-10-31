@@ -6,19 +6,25 @@ const utils = require('./controller-utils')
 
 const getCartItems = async (req, res) => {
     const cartItems = await models.Cart_Item.findAll() //in future add where user_uuid = req.body.userID
-    const allPrices = cartItems.map(x => x.price)
-    // cartItems.forEach(cart => {
-    //     if(!utils.integerTest(cart.price)) {
-    //         cart.price = utils.addDecimal(cart.price);
-    //     }
-    // })
-    console.log("allPrices before reduce:", allPrices)
     if (cartItems.length !== 0) {
+        cartItems.forEach(ci => {
+            if (!utils.integerTest(ci.price)) { //if it fails the integer test
+                ci.price = parseFloat(utils.addDecimal(ci.price));
+            }
+        })
+        const allPrices = cartItems.map(x => x.price)
+        const cartInts = allPrices.filter(x => utils.integerTest(x));
+        const cartDecs = allPrices.filter(x => !utils.integerTest(x));
+        console.log("allPrices before reduce:", allPrices)
+        const cartIntsTotal = cartInts.reduce((acc, val) => {
+            return acc + val
+        }, 0)
+        const cartDecsTotal = cartDecs.reduce((acc, val) => {
+            return acc + val
+        }, 0) //calc total cost of 
         const dataForFE = {
             cart_items: cartItems,
-            cart_total: allPrices.reduce((acc, val) => {
-                return acc + val
-            }, 0)
+            cart_total: cartIntsTotal + cartDecsTotal,
         }
         console.log("cart_total:", dataForFE.cart_total)
         return res.json(dataForFE)

@@ -105,7 +105,7 @@ export default function ShoppingCart() {
                     tempCart.push({...item, quantity: data.quantity})
                     setCartItems(tempCart)
                     getCartItems()
-                    calcCartTotal()
+                   // calcCartTotal("+")
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
@@ -119,7 +119,7 @@ export default function ShoppingCart() {
                 price: prod.price + unitPrice
             }
             setCartItems(tempCart);
-            calcCartTotal()
+           // calcCartTotal("+")
             updateCartItem(tempCart[itemIndex])
         }
     }
@@ -136,7 +136,7 @@ export default function ShoppingCart() {
                     return c !== itemReduced;
                 })
                 setCartItems(filteredCart);
-                calcCartTotal()
+                //calcCartTotal("-")
                 deleteCartItem(itemReduced);
             }
         } else { //if quantity is > 1, reduce quantity and decrease price instead
@@ -149,27 +149,48 @@ export default function ShoppingCart() {
                 price: reducedItem.price - unitPrice,
                 quantity: reducedItem.quantity - 1,
             }
-            calcCartTotal()
+          // calcCartTotal("+")
             setCartItems(tempCart)
             updateCartItem(tempCart[reducedItemIndex]);
         }
         
     }
 
-    const calcCartTotal = () => {
-        //TODO: FIGURE OUT WHY THE INTS ARE BEING / 100, SHOULD ONLY HAPPEN TO FLOATS
-        return cartItems.map(item => {
-            let total = 0;
-            const unitPrice = calcUnitPrice(item.price, item.quantity)
-            if(!integerTest(total)) {
-                total += Number(Number(item.quantity * unitPrice).toFixed(2))
-            } else {
-                total += (item.quantity * unitPrice)
-            }
-            console.log("subtotal: ", total)
-            return setCartTotal(total)
-        })  
-    }
+    // const calcCartTotal = (operation) => {
+    //     //TODO: FIGURE OUT WHY THE INTS ARE BEING / 100, SHOULD ONLY HAPPEN TO FLOATS
+    //     const allPrices = cartItems.map(x => x.price)
+    //     console.log("prices", allPrices)
+    //     return cartItems.map(item => {
+    //         switch (operation) {
+    //             case "+": { //addition
+    //                 const unitPrice = calcUnitPrice(item.price, item.quantity)
+    //                 const total = allPrices.reduce(() => {
+    //                     return cartTotal + unitPrice
+    //                 }, cartTotal)
+    //                 console.log("subtotal: ", total)
+    //                 if(!integerTest(total)) {
+    //                     return setCartTotal(addDecimal(total))
+    //                 } else {
+    //                     return setCartTotal(total)
+    //                 }
+    //             } 
+    //             case "-": { //subtraction
+    //                 const unitPrice = calcUnitPrice(item.price, item.quantity)
+    //                 const total = allPrices.reduce(() => {
+    //                     return cartTotal + unitPrice
+    //                 }, item.price)
+    //                 console.log("subtotal: ", total)
+    //                 if(!integerTest(total)) {
+    //                     return setCartTotal(addDecimal(total))
+    //                 } else {
+    //                     return setCartTotal(total)
+    //                 }
+    //             }
+    //             default: break;
+    //         }
+    //         return;
+    //     })  
+    // }
 
     const submitOrder = async() => {
         const endpoint = `submitOrder`;
@@ -246,7 +267,7 @@ export default function ShoppingCart() {
                                 return <li key={ci.uuid}><CartItem ci={ci} decreaseItem={decreaseItem} addItem={addItem}/></li>
                             })}
                         </ul>
-                        <footer className='cart-footer'>Total: ${!integerTest(cartTotal) ? addDecimal(cartTotal / 100) : cartTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        <footer className='cart-footer'>Total: ${!integerTest(cartTotal) ? Number(cartTotal).toFixed(2) : cartTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
                         
                     </section>
                 </div>
@@ -263,7 +284,7 @@ const Product = (props) => {
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
-        price: !isInt ? parseFloat(addDecimal(p.price / 100)) : p.price,
+        price: !isInt ? Number(addDecimal(p.price)) : p.price,
         image_url: p.image_url,
         quantity: 1
     }
@@ -274,7 +295,7 @@ const Product = (props) => {
     return (
         <section className="product-info">
           <h3 id="productname">{p.product_name}</h3>
-          <p>${!isInt ? addDecimal(p.price / 100) : p.price}</p>
+          <p>${!isInt ? addDecimal(p.price) : p.price}</p>
           <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
           <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
         </section>
@@ -286,7 +307,7 @@ const CartItem = (props) => {
     const decreaseItem = props.decreaseItem;
     const addItem = props.addItem;
     const isInt = integerTest(ci.price);
-    const formattedPrice = Number(addDecimal(ci.price / 100));
+    const formattedPrice = Number(Number(ci.price).toFixed(2))
     if(!isInt) {
         ci.price = formattedPrice;
     }
@@ -301,7 +322,7 @@ const CartItem = (props) => {
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{!isInt ? addDecimal(ci.price) : ci.price}</span>
+            <span>{!isInt ? ci.price : ci.price}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>

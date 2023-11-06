@@ -1,9 +1,9 @@
 import React  from 'react';
 import { useState, useEffect} from 'react';
-import { handleGet, handlePost } from './services/requests-service';
-import './styles/products.css';
+import { handleGet, handlePost } from '../services/requests-service';
+import '../styles/products.css';
 import { Snackbar } from '@mui/material';
-import { integerTest, addDecimal } from './util-methods';
+import { addDecimal } from '../util-methods';
 
 export default function Products() {
     const [products, setProducts] = useState([]);
@@ -14,18 +14,8 @@ export default function Products() {
         price: 0
     })
     const getProducts = async () => {
-        const url = `allProducts`
-        await fetch(url, {
-            method: 'GET',
-        }).then(response => response.json(),
-        []).then(responseData => {
-            if(responseData.length === 0) {
-                setProducts([]);
-            } else {
-                setProducts(responseData); //set it equal to data from API
-            }
-            
-        })
+        const endpoint = `products`
+        await handleGet(endpoint, setProducts)
     }
     useEffect(() => {
         document.title = "Admin Products"
@@ -47,7 +37,6 @@ export default function Products() {
             const data = await response.json()
             if(response.status === 200 || response.status === 201) {
                 setProducts([...products, data])
-                getProducts();
                 setOpenSnackbar(true);
                 setTimeout(() => {
                     setOpenSnackbar(false);
@@ -56,6 +45,7 @@ export default function Products() {
                         imageURL: '',
                         price: 0
                     })
+                    getProducts();
                 }, 1500)
 
             } else {
@@ -91,6 +81,7 @@ export default function Products() {
                 <section className='add-product'>
                     <span className='product-form-question' id="productname">Product Name: <input type="text" className='user-input' name="productName" value={newProduct.productName} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                     <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
+                    <h4>Note: For non decimal prices, please include the .00 at the end. Ex: $1,200 would be $1,200.00</h4>
                     <span className='product-form-question' id="productprice">Product Price: <input type="number" min="0" max="2500" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                     <button type='button' onClick={postProduct}>Submit</button>
                 </section>
@@ -101,14 +92,11 @@ export default function Products() {
 
 const Product = (props) => {
     const p = props.p;
-    const formattedPrice = addDecimal(p.price);
-    const isInt = integerTest(Number(p.price / 100));
-    const price = isInt === true ? p.price : formattedPrice;
     return (
         <section className="product-info">
             <h3 id="productname">{p.product_name}</h3>
             <img className="product-list-img" src = {p.image_url} alt = {p.product_name}/>
-            <p>${price}</p>
+            <p>${addDecimal(p.price)}</p>
         </section>
     )
 }

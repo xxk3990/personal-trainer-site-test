@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
-const environment = 'production';
+const environment = 'development';
 //const process = require("process")
 const config = require(`${__dirname}/../config/config.js`)[environment];
 const db = {};
@@ -22,12 +22,6 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   dialect: 'postgres',
   pool: { maxConnections: 5, maxIdleTime: 30},
   language: 'en',
-  dialectOptions: {
-    ssl: {
-      rejectUnauthorized: true,
-      ca: [rdsCa]
-    }
-  }
 })
 
 const models = {

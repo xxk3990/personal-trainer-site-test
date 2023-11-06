@@ -2,14 +2,14 @@ import React  from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { handleGet, handlePost } from './services/requests-service';
-import './styles/orders.css';
-import { addDecimal, integerTest } from './util-methods';
+import { handleGet } from '../services/requests-service';
+import '../styles/orders.css';
+import { addDecimal } from '../util-methods';
 
 export default function Orders() {
     const [orders, setOrders] = useState([]);
     const getOrders = () => {
-        const endpoint = `userOrders`
+        const endpoint = `orders`
         handleGet(endpoint, setOrders)
     }
     useEffect(() => {
@@ -38,7 +38,7 @@ const OrderTile = (props) => {
     return (
         <section className='order-info'>
             <h3>Date: {odr.order_date}</h3>
-            <p>Amount: ${odr.order_total}</p>
+            <p>Amount: ${addDecimal(odr.order_total)}</p>
         </section>
     )
 }

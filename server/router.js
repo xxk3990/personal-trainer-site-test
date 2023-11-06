@@ -7,15 +7,15 @@ const router = (app) => {
    // app.post('/login', users.login)
  //   app.post('/addUser', users.createAccount)
    // app.get('/verify', mid.verifyRequestAuth, mid.verifySession)
-    app.get('/allProducts', product.getProducts)
+    app.get('/products', product.getProducts)
     app.post('/addProduct', product.addProduct) //admin only
-    app.get('/userOrders', order.userOrders) //this one is for specific users, need another for admin purposes
+    app.get('/orders', order.userOrders) //this one is for specific users, need another for admin purposes
     //app.get('/allOrders', admin.getAllOrders) not created yet
     app.post('/submitOrder', order.submitOrder)
     app.get('/orderItems', items.getOrderItems);
     app.get('/cartItems', cart.getCartItems)
     app.post("/addToCart", cart.createCartItem);
-    app.patch('/updateCartItem', cart.updateCartItem);
+    app.put('/updateCartItem', cart.updateCartItem);
     app.delete("/deleteCartItem", cart.deleteCartItem)
 
 

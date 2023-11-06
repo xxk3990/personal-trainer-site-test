@@ -5,11 +5,11 @@ const cors = require('cors');
 const { expressjwt: jwt } = require("express-jwt");
 const process = require('process')
 const router = require("./router");
-const port = 3000;
+const port = process.env.PORT || 3000
 
 const app = express();
 app.use(cookieParser());
-app.use(cors({ origin: "personal-trainer-site.cg6tsyf9mgr3.us-east-2.rds.amazonaws.com"}))
+app.use(cors({ origin: "*"}))
 app.use(express.json());
 
 

@@ -7,11 +7,6 @@ const utils = require('./controller-utils')
 const getProducts = async (req, res) => { 
     const products = await models.Product.findAll();
     if(products.length !== 0) {
-        products.forEach(prod => {
-            if(!utils.integerTest(prod.price)) {
-                prod.price = Number(prod.price).toFixed(2);
-            }
-        })
         return res.json(products)
     } else {
         return res.send([]) //send empty response so front-end can check if products.length === 0
@@ -19,7 +14,7 @@ const getProducts = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
-    const priceAsInt = utils.removeDecimalIfNeeded(req.body.price)
+    const priceAsInt = utils.removeDecimalIfNeeded(req.body.price) //remove decimal entered on FE
     const newProduct = {
         //id, product_name, image_url, price
         uuid: uuidv4(),

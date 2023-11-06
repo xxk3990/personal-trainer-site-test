@@ -1,5 +1,7 @@
+const host = process.env.REACT_APP_BASEURL_LOCAL || process.env.REACT_APP_BASEURL_PROD
 export const handleGet = async (endpoint, setDataInComponent) => {
-    const url = `http://localhost:3000/${endpoint}`
+    const url = `${host}/${endpoint}`
+    console.log(url);
     await fetch(url, {
         method: 'GET',
      //   credentials: "include"
@@ -16,7 +18,7 @@ export const handleGet = async (endpoint, setDataInComponent) => {
 }
 
 export const handlePost = async (endpoint, body) => {
-    const url = `http://localhost:3000/${endpoint}`;
+    const url = `${host}/${endpoint}`;
         const requestParams = {
             method: 'POST',
             headers: {
@@ -29,10 +31,10 @@ export const handlePost = async (endpoint, body) => {
     return fetch(url, requestParams)
 }
 
-export const handlePatch = async (endpoint, body) => {
-    const url = `http://localhost:3000/${endpoint}`;
+export const handlePut = async (endpoint, body) => {
+    const url = `${host}/${endpoint}`;
     const requestParams = {
-        method: "PATCH",
+        method: "PUT",
         headers: {
             "Content-Type": 'application/json',
             //"Authorization": `Bearer ${token}` 
@@ -44,7 +46,7 @@ export const handlePatch = async (endpoint, body) => {
 }
 
 export const handleDelete = (endpoint) => {
-    const url = `http://localhost:3000/${endpoint}`
+    const url = `${host}/${endpoint}`
     const requestParams = {
         method: 'DELETE',
         headers: {

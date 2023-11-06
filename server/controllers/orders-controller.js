@@ -7,19 +7,6 @@ const utils = require('./controller-utils')
 const userOrders = async (req, res) => {
     const orders = await models.Order.findAll(); //add check for orders based on specific user once users are added
     if (orders.length !== 0) {
-        orders.forEach(odr => {
-            if (!utils.integerTest(odr.order_total)) {
-                const decimalTotal = Number(odr.order_total).toFixed(2);
-                const totalSplit = decimalTotal.split(".")
-                if (decimalTotal[decimalTotal.length - 2] === ".") {
-                    const zero = 0;
-                    totalSplit[1] = `${totalSplit[1]}${zero}`
-                    odr.order_total = parseFloat(Number(`${totalSplit[0]}.${totalSplit[1]}`).toFixed(2))
-                } else {
-                    odr.order_total = utils.addDecimal(odr.order_total)
-                }
-            }
-        })
         return res.json(orders)
     } else {
         return res.send([]) //send empty response so front-end can check if orders.length === 0
@@ -28,25 +15,30 @@ const userOrders = async (req, res) => {
 
 const submitOrder = async (req, res) => { //add transactional integrity
     const orderItems = req.body.cart_items;
+    const total = req.body.order_total;
+    console.log("total:",total)
     if (orderItems.length === 0 || !orderItems) { //if there is an issue with the items in their order
         return res.status(400).send()
     } else {
         const orderDate = new Date(req.body.order_date).toISOString();
         const newOrder = {
-            //id, order_date, order_total
+            //id, order_date, order_total (gets added based on decimals below)
             uuid: uuidv4(),
             order_date: orderDate,
-            order_total: ""
-        }
-        const totalString = req.body.order_total.toString();
-        if (totalString[totalString - 2] === ".") {
-            const totalSplit = totalString.split(".")
-            totalSplit[1] = `${totalSplit[1]}0`
-            newOrder.order_total = utils.removeDecimalIfNeeded(parseFloat(`${totalSplit[0]}.${totalSplit[1]}`).toFixed(2))
-        } else {
-            newOrder.order_total = utils.removeDecimalIfNeeded(req.body.order_total)
+            order_total: 0,
         }
         try {
+            const totalString = total.toString();
+            if (totalString[totalString.length - 2] === ".") {
+                const totalSplit = totalString.split(".");
+                const zero = 0;
+                const decimalSide = `${totalSplit[1]}${zero}`
+                const parseWithZero = parseFloat(`${totalSplit[0]}.${decimalSide}`).toFixed(2);
+                newOrder.order_total += utils.removeDecimalIfNeeded(parseWithZero);
+                //save it with the zero so the decimal location is accurate (ex: 199.90 would be 19.99 without it)
+            } else {
+                newOrder.order_total += utils.removeDecimalIfNeeded(total)
+            }
             models.sequelize.transaction(async () => {
                 orderItems.map(async item => {
                     await models.Order_Item.create({

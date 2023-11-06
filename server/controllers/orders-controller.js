@@ -7,20 +7,6 @@ const utils = require('./controller-utils')
 const userOrders = async (req, res) => {
     const orders = await models.Order.findAll(); //add check for orders based on specific user once users are added
     if (orders.length !== 0) {
-        orders.forEach(odr => {
-            if (!utils.integerTest(odr.order_total)) {
-                const decimalTotal = Number(odr.order_total).toFixed(2);
-                console.log(decimalTotal);
-                const totalSplit = decimalTotal.split(".")
-                if (decimalTotal[decimalTotal.length - 2] === ".") {
-                    const zero = 0;
-                    const decimalSide = `${totalSplit[1]}${zero}`
-                    odr.order_total = parseFloat(Number(`${totalSplit[0]}.${decimalSide}`).toFixed(2))
-                } else {
-                    odr.order_total = utils.addDecimal(odr.order_total)
-                }
-            }
-        })
         return res.json(orders)
     } else {
         return res.send([]) //send empty response so front-end can check if orders.length === 0

@@ -82,7 +82,7 @@ export default function ShoppingCart() {
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
-        } else { //if it does, update quantity and price and then call UPDATE item method
+        } else { //if it does, update quantity and price and then call submit update method
             const prod = tempCart[itemIndex];
             console.log("PUT code hit")
             const unitPrice = calcUnitPrice(prod.price, prod.quantity)
@@ -93,7 +93,7 @@ export default function ShoppingCart() {
                 price: prod.price + unitPrice
             }
             setCartItems(tempCart);
-            submitCartUpdate(tempCart[itemIndex])
+            submitCartUpdate(tempCart[itemIndex]) //submit item update to DB
         }
     }
 
@@ -122,7 +122,7 @@ export default function ShoppingCart() {
                 quantity: reducedItem.quantity - 1,
             }
             setCartItems(tempCart)
-            submitCartUpdate(tempCart[reducedItemIndex]);
+            submitCartUpdate(tempCart[reducedItemIndex]); //submit update to DB
         }
         
     }

@@ -13,13 +13,14 @@ export default function ShoppingCart() {
     const [snackbarMessage, setSnackbarMessage] = useState("");
     
     const getProducts = async () => {
-        const endpoint = `allProducts`
+        const endpoint = `products`
         await handleGet(endpoint, setProducts)
     }
 
     const getCartItems = async () => {
         //Couldn't use default request service handleGet method as I also had to calc the order total on load
-        const url = `http://localhost:3000/cartItems`
+        const host = process.env.REACT_APP_BASEURL_LOCAL || process.env.REACT_APP_BASEURL_PROD
+        const url = `${host}/cartItems`
         await fetch(url, {
             method: 'GET',
         }).then(response => response.json(),
@@ -33,33 +34,6 @@ export default function ShoppingCart() {
             }
             
         })
-    }
-
-    const updateCartItem = async (item) => {
-        const endpoint = `updateCartItem`
-        console.log(item)
-        if(!integerTest(item.price)) {
-            const requestBody = {
-                item: item,
-                price: parseFloat(item.price).toFixed(2)
-            }
-            console.log('updated item price:',item.price);
-            const response = await handlePut(endpoint, requestBody);
-            if(response.status === 200 || response.status === 201) {
-                getCartItems();
-            }
-        } else {
-            const requestBody = {
-                item: item,
-                price: item.price
-            }
-            console.log('updated item price:',item.price);
-            const response = await handlePut(endpoint, requestBody);
-            if(response.status === 200 || response.status === 201) {
-                getCartItems();
-            }
-        }
-        
     }
 
     const deleteCartItem = async(itemToDelete) => {
@@ -77,7 +51,7 @@ export default function ShoppingCart() {
     }, []);
 
 
-    const addItem = async(item) => {
+    const addCartItem = async(item) => {
         const endpoint = `addToCart`
         const tempCart = [...cartItems];
         const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
@@ -108,7 +82,7 @@ export default function ShoppingCart() {
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
-        } else { //if it does, update quantity and price and call put method only
+        } else { //if it does, update quantity and price and then call UPDATE item method
             const prod = tempCart[itemIndex];
             console.log("PUT code hit")
             const unitPrice = calcUnitPrice(prod.price, prod.quantity)
@@ -119,11 +93,11 @@ export default function ShoppingCart() {
                 price: prod.price + unitPrice
             }
             setCartItems(tempCart);
-            updateCartItem(tempCart[itemIndex])
+            submitCartUpdate(tempCart[itemIndex])
         }
     }
 
-    const decreaseItem = (itemReduced) => {
+    const decreaseCartItem = (itemReduced) => {
         const tempCart = [...cartItems];
         if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
             if(cartItems.length === 1) {
@@ -148,9 +122,23 @@ export default function ShoppingCart() {
                 quantity: reducedItem.quantity - 1,
             }
             setCartItems(tempCart)
-            updateCartItem(tempCart[reducedItemIndex]);
+            submitCartUpdate(tempCart[reducedItemIndex]);
         }
         
+    }
+
+    const submitCartUpdate = async (item) => {
+        const endpoint = `updateCartItem`
+        console.log(item)
+        const requestBody = {
+            item: item,
+            price: item.price
+        }
+        console.log('updated item price:',item.price);
+        const response = await handlePut(endpoint, requestBody);
+        if(response.status === 200 || response.status === 201) {
+            getCartItems();
+        }
     }
 
     const submitOrder = async() => {
@@ -200,7 +188,7 @@ export default function ShoppingCart() {
                         return (
                             <section className='product-details'>
                             {/* give props and add to cart method to specific product */}
-                                <Product p={p} addItem={addItem}/> 
+                                <Product p={p} addCartItem={addCartItem}/> 
                             </section>
                         )
                     })}
@@ -216,7 +204,7 @@ export default function ShoppingCart() {
                         {products.map(p => {
                             return (
                                 <section className='product-details'>
-                                    <Product p={p} addItem={addItem}/>
+                                    <Product p={p} addCartItem={addCartItem}/>
                                 </section>
                             )
                         })}
@@ -225,10 +213,10 @@ export default function ShoppingCart() {
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
                                 console.log("cartTotal:", cartTotal);
-                                return <li key={ci.uuid}><CartItem ci={ci} decreaseItem={decreaseItem} addItem={addItem}/></li>
+                                return <li key={ci.uuid}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem}/></li>
                             })}
                         </ul>
-                        <footer className='cart-footer'>Total: ${!integerTest(cartTotal) ? Number(cartTotal).toFixed(2) : cartTotal} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        <footer className='cart-footer'>Total: ${addDecimal(cartTotal)} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
                         
                     </section>
                 </div>
@@ -240,23 +228,22 @@ export default function ShoppingCart() {
 
 const Product = (props) => {
     const p = props.p;
-    const addItem = props.addItem;
-    const isInt = integerTest(p.price)
+    const addCartItem = props.addCartItem;
     const item = {
         product_name: p.product_name,
         product_uuid: p.uuid,
-        price: !isInt ? Number(addDecimal(p.price)) : p.price,
+        price: p.price,
         image_url: p.image_url,
         quantity: 1
     }
     const handleClick = () => {
         //call parent "add to cart" method with child's unique product info
-        addItem(item);
+        addCartItem(item);
     }
     return (
         <section className="product-info">
           <h3 id="productname">{p.product_name}</h3>
-          <p>${!isInt ? addDecimal(p.price) : p.price}</p>
+          <p>${addDecimal(p.price)}</p>
           <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
           <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
         </section>
@@ -265,25 +252,20 @@ const Product = (props) => {
 
 const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
-    const decreaseItem = props.decreaseItem;
-    const addItem = props.addItem;
-    const isInt = integerTest(ci.price);
-    const formattedPrice = parseFloat(Number(ci.price).toFixed(2))
-    if(!isInt) {
-        ci.price = formattedPrice;
-    }
+    const decreaseCartItem = props.decreaseCartItem;
+    const addCartItem = props.addCartItem;
     const handleDecrease = () => {
-        decreaseItem(ci);
+        decreaseCartItem(ci);
     }
     const handleIncrease = () => {
-        addItem(ci);
+        addCartItem(ci);
     }
     return (
         <section className='cart-item-li'>
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{!isInt ? Number(ci.price).toFixed(2) : ci.price}</span>
+            <span>{addDecimal(ci.price)}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>

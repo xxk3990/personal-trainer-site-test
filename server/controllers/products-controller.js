@@ -14,7 +14,7 @@ const getProducts = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
-    const priceAsInt = utils.removeDecimalIfNeeded(req.body.price)
+    const priceAsInt = utils.removeDecimalIfNeeded(req.body.price) //remove decimal entered on FE
     const newProduct = {
         //id, product_name, image_url, price
         uuid: uuidv4(),

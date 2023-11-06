@@ -22,23 +22,11 @@ const submitOrder = async (req, res) => { //add transactional integrity
     } else {
         const orderDate = new Date(req.body.order_date).toISOString();
         const newOrder = {
-            //id, order_date, order_total (gets added based on decimals below)
             uuid: uuidv4(),
             order_date: orderDate,
-            order_total: 0,
+            order_total: total,
         }
         try {
-            const totalString = total.toString();
-            if (totalString[totalString.length - 2] === ".") {
-                const totalSplit = totalString.split(".");
-                const zero = 0;
-                const decimalSide = `${totalSplit[1]}${zero}`
-                const parseWithZero = parseFloat(`${totalSplit[0]}.${decimalSide}`).toFixed(2);
-                newOrder.order_total += utils.removeDecimalIfNeeded(parseWithZero);
-                //save it with the zero so the decimal location is accurate (ex: 199.90 would be 19.99 without it)
-            } else {
-                newOrder.order_total += utils.removeDecimalIfNeeded(total)
-            }
             models.sequelize.transaction(async () => {
                 orderItems.map(async item => {
                     await models.Order_Item.create({

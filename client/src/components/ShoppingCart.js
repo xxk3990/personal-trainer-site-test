@@ -36,12 +36,6 @@ export default function ShoppingCart() {
         })
     }
 
-    const deleteCartItem = async(itemToDelete) => {
-        const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
-        await handleDelete(endpoint)
-        getCartItems();
-    }
-
     const calcUnitPrice = (price, quantity) => price / quantity;
 
     useEffect(() => {
@@ -111,7 +105,7 @@ export default function ShoppingCart() {
                 setCartItems(filteredCart);
                 deleteCartItem(itemReduced);
             }
-        } else { //if quantity is > 1, reduce quantity and decrease price instead
+        } else { //if quantity is > 1, reduce quantity and price and call submit update to DB instead
             const reducedItemIndex = tempCart.findIndex((product) => itemReduced.product_uuid === product.product_uuid)
             const reducedItem = tempCart[reducedItemIndex];
             const unitPrice = calcUnitPrice(reducedItem.price, itemReduced.quantity) //divide the price by the quantity to get the original cost
@@ -139,6 +133,12 @@ export default function ShoppingCart() {
         if(response.status === 200 || response.status === 201) {
             getCartItems();
         }
+    }
+
+    const deleteCartItem = async(itemToDelete) => {
+        const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
+        await handleDelete(endpoint)
+        getCartItems();
     }
 
     const submitOrder = async() => {

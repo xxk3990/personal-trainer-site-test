@@ -1,13 +1,15 @@
 import React  from 'react';
 import { useState, useEffect} from 'react';
-import { handleGet, handlePost } from '../services/requests-service';
+import { handleGet, handlePost, handlePut } from '../services/requests-service';
 import '../styles/products.css';
 import { Snackbar } from '@mui/material';
 import { addDecimal } from '../util-methods';
+import { ReactDOM } from 'react';
 
 export default function Products() {
     const [products, setProducts] = useState([]);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("")
     const [newProduct, setNewProduct] = useState({
         productName: '',
         imageURL: '',
@@ -25,6 +27,7 @@ export default function Products() {
     const handleChange = (name, value) => {
         setNewProduct({...newProduct, [name]:value})
     }
+
     const postProduct = async() => {
         const endpoint = `addProduct`;
         const requestBody = {
@@ -38,6 +41,7 @@ export default function Products() {
             if(response.status === 200 || response.status === 201) {
                 setProducts([...products, data])
                 setOpenSnackbar(true);
+                setSnackbarMessage("Product added successfully!")
                 setTimeout(() => {
                     setOpenSnackbar(false);
                     setNewProduct({
@@ -45,6 +49,7 @@ export default function Products() {
                         imageURL: '',
                         price: 0
                     })
+                    setSnackbarMessage("")
                     getProducts();
                 }, 1500)
 
@@ -55,15 +60,35 @@ export default function Products() {
             alert("An Error occurred during product creation.")
         }
     }
+    const submitProductUpdate = async (product, showEditProduct, setShowEditProduct) => {
+        const endpoint = `updateProduct`
+        console.log(product)
+        const requestBody = {
+            product: product,
+        }
+        console.log('updated item price:',product.price);
+        const response = await handlePut(endpoint, requestBody);
+        if(response.status === 200 || response.status === 201) {
+            getProducts();
+            setOpenSnackbar(true);
+            setSnackbarMessage("Product Update Successful!")
+                setTimeout(() => {
+                    setOpenSnackbar(false);
+                    setSnackbarMessage("")
+                    getProducts();
+                    setShowEditProduct(!showEditProduct); //hide edit product element
+            }, 1500)
+        }
+    }
     if(products.length === 0) {
       return (
         <div className='Products'>
-            <Snackbar open={openSnackbar} autoHideDuration={1500} message="Product Added Successfully!" anchorOrigin={{horizontal: "center", vertical:"top"}}/>
+            <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
             <h4>No products yet!</h4>
             <section className='add-product'>
                 <span className='product-form-question' id="productname">Product Name: <input type="text" className='user-input' name="productName" value={newProduct.productName} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                 <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" value={newProduct.imageURL} onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
-                <span className='product-form-question' id="productprice">Product Price: <input type="number" min="0" max="2500" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
+                <span className='product-form-question' id="productprice">Product Price: <input type="number" min="0" max="3500" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                 <button type='button' onClick={postProduct}>Submit</button>
             </section>
         </div>
@@ -71,18 +96,18 @@ export default function Products() {
     } else {
         return (
             <div className='Products'>
-                <Snackbar open={openSnackbar} autoHideDuration={1500} message="Product Added Successfully!" anchorOrigin={{horizontal: "center", vertical:"top"}}/>
+                <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
                 <h1>All products</h1>
                 <section className='products-grid'>
                     {products.map(p => {
-                        return <Product p={p}/>
+                        return <Product p={p} submitProductUpdate={submitProductUpdate}/>
                     })}
                 </section>
                 <section className='add-product'>
                     <span className='product-form-question' id="productname">Product Name: <input type="text" className='user-input' name="productName" value={newProduct.productName} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                     <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
-                    <h4>Note: For non decimal prices, please include the .00 at the end. Ex: $1,200 would be $1,200.00</h4>
-                    <span className='product-form-question' id="productprice">Product Price: <input type="number" min="0" max="2500" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
+                    <h5>You do not need to add the .00 for non-decimal prices, the site will do it for you! </h5>
+                    <span className='product-form-question' id="productprice">Product Price: <input type="text" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                     <button type='button' onClick={postProduct}>Submit</button>
                 </section>
             </div>
@@ -92,11 +117,47 @@ export default function Products() {
 
 const Product = (props) => {
     const p = props.p;
+    const submitProductUpdate = props.submitProductUpdate;
+    const [showEditProduct, setShowEditProduct] = useState(false); //show and hide edit menu
     return (
         <section className="product-info">
             <h3 id="productname">{p.product_name}</h3>
-            <img className="product-list-img" src = {p.image_url} alt = {p.product_name}/>
+            <img className="product-list-img" src={p.image_url} alt={p.product_name} />
             <p>${addDecimal(p.price)}</p>
+            <span className='edit-menu-btn-span'><button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button></span>
+            {/* Below code shows the menu based on the boolean value and passes in the submit update from the parent. */}
+            {showEditProduct ? <EditProduct p = {p} submitProductUpdate={submitProductUpdate} showEditProduct={showEditProduct} setShowEditProduct={setShowEditProduct}/> : null}
         </section>
     )
+}
+
+//I had to make this a separate method otherwise the html in it would appear for 
+//every item as well as the one I clicked on
+const EditProduct = (props) => {
+    const p = props.p;
+    const submitProductUpdate = props.submitProductUpdate;
+    const showEditProduct = props.showEditProduct;
+    const setShowEditProduct = props.setShowEditProduct;
+    const [updatedProduct, setUpdatedProduct] = useState({
+        uuid: p.uuid,
+        product_name: p.product_name,
+        image_url: p.image_url,
+        price: addDecimal(p.price), //allowed here, server will check for decimals and remove em
+    })
+    const handleChange = (name, value) => {
+        setUpdatedProduct({...updatedProduct, [name]:value})
+    }
+    const submitUpdate = () => {
+        //pass in booleans so this element can be hidden on successful update!
+        submitProductUpdate(updatedProduct, showEditProduct, setShowEditProduct);
+    }
+    return ( 
+        <section className='product-edit-form'>
+            <span className='product-update-display'><h4>Name:</h4><input className='product-update-input' name="product_name" type="text" value={updatedProduct.product_name} onChange={e => handleChange(e.target.name, e.target.value)}/></span>
+            <span className='product-update-display'><h4>Image:</h4><input className='product-update-input' name="image_url" type="text" value={updatedProduct.image_url} onChange={e => handleChange(e.target.name, e.target.value)}/></span>
+            <span className='product-update-display'><h4>Price:</h4><input className='product-update-input' type="text" name="price" value={updatedProduct.price} onChange={e => handleChange(e.target.name, e.target.value)}/></span>
+            <button onClick = {submitUpdate}>Submit Changes</button>
+        </section>
+    )
+
 }

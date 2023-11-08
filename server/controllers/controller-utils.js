@@ -5,7 +5,7 @@ const removeDecimalIfNeeded = (amount) => {
         const priceWithoutDecimal = `${removeDecPoint[0]}${removeDecPoint[1]}` //combine into single string
         return parseInt(priceWithoutDecimal); //convert combined string to integer
     } else { //otherwise just return the number as is
-        return parseInt(amount);
+        return parseInt(`${amount}00`); //but add on the two zeros so the math doesn't get screwed up later
     }
 }
 

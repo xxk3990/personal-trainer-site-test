@@ -72,11 +72,11 @@ export default function Products() {
             getProducts();
             setOpenSnackbar(true);
             setSnackbarMessage("Product Update Successful!")
-                setTimeout(() => {
-                    setOpenSnackbar(false);
-                    setSnackbarMessage("")
-                    getProducts();
-                    setShowEditProduct(!showEditProduct); //hide edit product element
+            setTimeout(() => {
+                setOpenSnackbar(false);
+                setSnackbarMessage("")
+                setShowEditProduct(!showEditProduct); //hide edit product element
+                getProducts();
             }, 1500)
         }
     }

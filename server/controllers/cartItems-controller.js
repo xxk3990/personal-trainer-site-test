@@ -70,12 +70,16 @@ const updateCartItem = async (req, res, next) => {
 }
 
 const deleteCartItem = async (req, res) => {
-    res.status(200).send()
-    return models.Cart_Item.destroy({
-        where: {
-            'product_uuid': req.query.product
-        }
-    });
+    try {
+        res.status(200).send()
+        return models.Cart_Item.destroy({
+            where: {
+                'product_uuid': req.query.product
+            }
+        });
+    } catch {
+        return res.status(400).send()
+    }
 }
 
 

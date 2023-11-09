@@ -95,7 +95,7 @@ export default function ShoppingCart() {
         const tempCart = [...cartItems];
         if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
             if(cartItems.length === 1) {
-                deleteCartItem(itemReduced);
+                submitCartDelete(itemReduced);
                 setCartItems([])
                 setCartTotal(0);
             } else {
@@ -103,7 +103,7 @@ export default function ShoppingCart() {
                     return c !== itemReduced;
                 })
                 setCartItems(filteredCart);
-                deleteCartItem(itemReduced);
+                submitCartDelete(itemReduced);
             }
         } else { //if quantity is > 1, reduce quantity and price and call submit update to DB instead
             const reducedItemIndex = tempCart.findIndex((product) => itemReduced.product_uuid === product.product_uuid)
@@ -135,10 +135,18 @@ export default function ShoppingCart() {
         }
     }
 
-    const deleteCartItem = async(itemToDelete) => {
+    const submitCartDelete = async(itemToDelete) => {
         const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
-        await handleDelete(endpoint)
-        getCartItems();
+        const response = await handleDelete(endpoint)
+        if(response.status === 200) {
+            setOpenSnackbar(true);
+            setSnackbarMessage("Cart Item Deleted Successfully!");
+            setTimeout(() => {
+                setOpenSnackbar(false);
+                setSnackbarMessage("");
+                getCartItems();
+            }, 1500)
+        }
     }
 
     const submitOrder = async() => {
@@ -213,7 +221,7 @@ export default function ShoppingCart() {
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
                                 console.log("cartTotal:", cartTotal);
-                                return <li key={ci.uuid}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem}/></li>
+                                return <li key={ci.uuid}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem} submitCartDelete={submitCartDelete}/></li>
                             })}
                         </ul>
                         <footer className='cart-footer'>Total: ${addDecimal(cartTotal)} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
@@ -254,11 +262,15 @@ const CartItem = (props) => {
     const ci = props.ci; //ci for Cart Item
     const decreaseCartItem = props.decreaseCartItem;
     const addCartItem = props.addCartItem;
+    const submitCartDelete = props.submitCartDelete;
     const handleDecrease = () => {
         decreaseCartItem(ci);
     }
     const handleIncrease = () => {
         addCartItem(ci);
+    }
+    const handleDelete = () => {
+        submitCartDelete(ci);
     }
     return (
         <section className='cart-item-li'>
@@ -268,7 +280,8 @@ const CartItem = (props) => {
             <span>{addDecimal(ci.price)}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
-                <button type="button" className='item-btn' onClick={handleDecrease} title='Decrease to 0 to remove completely.'> – </button>
+                <button type="button" className='item-btn' onClick={handleDecrease}> – </button>
+                <button type="button" className='item-btn' onClick={handleDelete}> Delete </button>
             </footer>
         </section>
     )

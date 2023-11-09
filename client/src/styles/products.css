@@ -49,7 +49,7 @@ button {
     width: 300px;
 }
 
-.edit-menu-btn-span {
+.edit-delete-btns {
     display: flex;
     justify-content: right;
 }

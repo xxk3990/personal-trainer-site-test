@@ -1,6 +1,6 @@
 import React  from 'react';
 import { useState, useEffect} from 'react';
-import { handleGet, handlePost, handlePut } from '../services/requests-service';
+import { handleGet, handlePost, handlePut, handleDelete } from '../services/requests-service';
 import '../styles/products.css';
 import { Snackbar } from '@mui/material';
 import { addDecimal } from '../util-methods';
@@ -15,10 +15,12 @@ export default function Products() {
         imageURL: '',
         price: 0
     })
+
     const getProducts = async () => {
         const endpoint = `products`
         await handleGet(endpoint, setProducts)
     }
+
     useEffect(() => {
         document.title = "Admin Products"
         getProducts()
@@ -28,7 +30,7 @@ export default function Products() {
         setNewProduct({...newProduct, [name]:value})
     }
 
-    const postProduct = async() => {
+    const submitProduct = async() => {
         const endpoint = `addProduct`;
         const requestBody = {
             product_name: newProduct.productName,
@@ -60,6 +62,7 @@ export default function Products() {
             alert("An Error occurred during product creation.")
         }
     }
+
     const submitProductUpdate = async (product, showEditProduct, setShowEditProduct) => {
         const endpoint = `updateProduct`
         console.log(product)
@@ -80,6 +83,22 @@ export default function Products() {
             }, 1500)
         }
     }
+
+    const submitProductDelete = async (prodToDelete) => {
+        const endpoint = `deleteProduct?product=${prodToDelete.uuid}`
+        const response = await handleDelete(endpoint)
+        if(response.status === 200) {
+            setOpenSnackbar(true);
+            setSnackbarMessage("Product Delete Successful!")
+            setTimeout(() => {
+                setOpenSnackbar(false);
+                setSnackbarMessage("")
+                getProducts();
+            }, 1500)
+        }
+       
+    }
+
     if(products.length === 0) {
       return (
         <div className='Products'>
@@ -89,7 +108,7 @@ export default function Products() {
                 <span className='product-form-question' id="productname">Product Name: <input type="text" className='user-input' name="productName" value={newProduct.productName} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
                 <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" value={newProduct.imageURL} onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
                 <span className='product-form-question' id="productprice">Product Price: <input type="number" min="0" max="3500" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
-                <button type='button' onClick={postProduct}>Submit</button>
+                <button type='button' onClick={submitProduct}>Submit</button>
             </section>
         </div>
       )  
@@ -100,7 +119,7 @@ export default function Products() {
                 <h1>All products</h1>
                 <section className='products-grid'>
                     {products.map(p => {
-                        return <Product p={p} submitProductUpdate={submitProductUpdate}/>
+                        return <Product p={p} submitProductUpdate={submitProductUpdate} submitProductDelete={submitProductDelete}/>
                     })}
                 </section>
                 <section className='add-product'>
@@ -108,7 +127,7 @@ export default function Products() {
                     <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
                     <h5>You do not need to add the .00 for non-decimal prices, the site will do it for you! </h5>
                     <span className='product-form-question' id="productprice">Product Price: <input type="text" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
-                    <button type='button' onClick={postProduct}>Submit</button>
+                    <button type='button' onClick={submitProduct}>Submit</button>
                 </section>
             </div>
         )
@@ -118,13 +137,20 @@ export default function Products() {
 const Product = (props) => {
     const p = props.p;
     const submitProductUpdate = props.submitProductUpdate;
+    const submitProductDelete = props.submitProductDelete;
+    const handleDelete = () => {
+        submitProductDelete(p);
+    }
     const [showEditProduct, setShowEditProduct] = useState(false); //show and hide edit menu
     return (
         <section className="product-info">
             <h3 id="productname">{p.product_name}</h3>
             <img className="product-list-img" src={p.image_url} alt={p.product_name} />
             <p>${addDecimal(p.price)}</p>
-            <span className='edit-menu-btn-span'><button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button></span>
+            <span className='edit-delete-btns'>
+                <button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button>
+                <button className='show-hide-edit-btn' onClick={handleDelete}>Delete</button>
+            </span>
             {/* Below code shows the menu based on the boolean value and passes in the submit update from the parent. */}
             {showEditProduct ? <EditProduct p = {p} submitProductUpdate={submitProductUpdate} showEditProduct={showEditProduct} setShowEditProduct={setShowEditProduct}/> : null}
         </section>

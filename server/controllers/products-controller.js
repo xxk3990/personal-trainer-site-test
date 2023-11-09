@@ -42,10 +42,22 @@ const updateProduct = async (req, res) => {
     } catch {
         return res.status(304).send()
     }
-    
+}
 
+const deleteProduct = async (req, res) => {
+    try {
+        res.status(200).send()
+        return models.Product.destroy({
+            where: {
+                'uuid': req.query.product
+            }
+        });
+    } catch {
+        return res.status(400).send()
+    }
+    
 }
 
 
 
-module.exports = {getProducts, addProduct, updateProduct}
+module.exports = {getProducts, addProduct, updateProduct, deleteProduct}

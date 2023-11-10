@@ -27,6 +27,8 @@
     padding: 0 15px 0 15px;
     margin: 0 10px 0 10px;
     margin-top: 10px;
+    max-height: 250px;
+    width: 300px;
 }
 
 .product-list-img {
@@ -35,4 +37,34 @@
 
 button {
     cursor: pointer;
+}
+
+.product-edit-form {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    position: absolute;
+    z-index: 1;
+    background-color: white;
+    border: 1px solid black;
+    width: 300px;
+}
+
+.edit-delete-btns {
+    display: flex;
+    justify-content: right;
+}
+
+.product-update-display {
+    display: flex;
+    justify-content: space-evenly;
+}
+.product-update-display h4 {
+    padding: 0;
+    margin: 0;
+}
+
+.product-update-display input {
+    height: 20px;
+    padding: 0;
+    width: 150px;
 }

@@ -26,6 +26,38 @@ const addProduct = async (req, res) => {
     return models.Product.create(newProduct);
 }
 
+const updateProduct = async (req, res) => {
+    const prod = req.body.product;
+    const prodToUpdate = await models.Product.findOne({
+        where: {
+            'uuid': prod.uuid
+        }
+    })
+    try {
+        prodToUpdate.price = utils.removeDecimalIfNeeded(prod.price);
+        prodToUpdate.product_name = prod.product_name;
+        prodToUpdate.image_url = prod.image_url;
+        await prodToUpdate.save();
+        return res.status(200).send()
+    } catch {
+        return res.status(304).send()
+    }
+}
+
+const deleteProduct = async (req, res) => {
+    try {
+        res.status(200).send()
+        return models.Product.destroy({
+            where: {
+                'uuid': req.query.product
+            }
+        });
+    } catch {
+        return res.status(400).send()
+    }
+    
+}
 
 
-module.exports = {getProducts, addProduct}
+
+module.exports = {getProducts, addProduct, updateProduct, deleteProduct}

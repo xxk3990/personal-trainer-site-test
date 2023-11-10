@@ -25,7 +25,7 @@ export default function Orders() {
             <div className='Orders'>
                 <section className='orders-grid'>
                     {orders.map(odr => {
-                        return <OrderTile odr={odr} />
+                        return <OrderTile key={odr.uuid} odr={odr} />
                     })}
                 </section>
             </div>

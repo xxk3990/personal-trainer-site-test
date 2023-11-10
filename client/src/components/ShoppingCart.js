@@ -1,8 +1,9 @@
 import React  from 'react';
 import { useState, useEffect } from 'react';
 import { handleGet, handlePost, handlePut, handleDelete } from '../services/requests-service'
-import { addDecimal, integerTest } from '../util-methods';
+import { addDecimal } from '../util-methods';
 import { Snackbar } from '@mui/material';
+import {v4 as uuidv4} from 'uuid'
 import '../styles/shopping-cart.css';
 
 export default function ShoppingCart() {
@@ -136,16 +137,20 @@ export default function ShoppingCart() {
     }
 
     const submitCartDelete = async(itemToDelete) => {
+        setSnackbarMessage("");
         const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
         const response = await handleDelete(endpoint)
+        setOpenSnackbar(true);
+        setSnackbarMessage("Removing item...");
         if(response.status === 200) {
-            setOpenSnackbar(true);
-            setSnackbarMessage("Cart Item Deleted Successfully!");
             setTimeout(() => {
                 setOpenSnackbar(false);
                 setSnackbarMessage("");
                 getCartItems();
-            }, 1500)
+            }, 750)
+        } else {
+            setOpenSnackbar(true);
+            setSnackbarMessage("Removing item...");
         }
     }
 
@@ -160,8 +165,9 @@ export default function ShoppingCart() {
         try {
             const response = await handlePost(endpoint, requestBody);
             if(response.status === 200 || response.status === 201) {
+                setSnackbarMessage("") //clear current msg
                 setOpenSnackbar(true);
-                setSnackbarMessage("Order Submitted Successfully!");
+                setSnackbarMessage("Order Submitted!"); //set it to order successful
                 setTimeout(() => {
                     setOpenSnackbar(false);
                     setCartItems([]);
@@ -170,7 +176,7 @@ export default function ShoppingCart() {
                 }, 1500)
             } else {
                 setOpenSnackbar(true);
-                setSnackbarMessage("Order Failed.");
+                setSnackbarMessage("Order submit failed."); //or order failed
                 setTimeout(() => {
                     setOpenSnackbar(false);
                     setSnackbarMessage("");
@@ -191,10 +197,10 @@ export default function ShoppingCart() {
             return (
                 <div className="ShoppingCart">
                   <h1>Shopping Cart</h1>
-                  <section className='products-grid'>
+                  <section key={uuidv4()} className='products-grid'>
                     {products.map(p => {
                         return (
-                            <section className='product-details'>
+                            <section key={p.uuid} className='product-details'>
                             {/* give props and add to cart method to specific product */}
                                 <Product p={p} addCartItem={addCartItem}/> 
                             </section>
@@ -206,26 +212,25 @@ export default function ShoppingCart() {
         } else {
             return (
                 <div className="ShoppingCart">
-                    <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
+                    <Snackbar sx={{width: 10}} ContentProps={{sx: {display: 'block', textAlign: "center", fontSize: "16px"}}} className='cart-snackbar' open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
                     <h1>Shopping Cart</h1>
-                    <section className = "products-grid">
+                    <section key={uuidv4()} className = "products-grid">
                         {products.map(p => {
                             return (
-                                <section className='product-details'>
+                                <section key={p.uuid} className='product-details'>
                                     <Product p={p} addCartItem={addCartItem}/>
                                 </section>
                             )
                         })}
                     </section>
-                    <section className='basket'>
+                    <section key={uuidv4()} className='basket'>
                         <ul className='cart-items-list'>
                             {cartItems.map(ci => { //ci for Cart Item
                                 console.log("cartTotal:", cartTotal);
-                                return <li key={ci.uuid}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem} submitCartDelete={submitCartDelete}/></li>
+                                return <li key={uuidv4()}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem} submitCartDelete={submitCartDelete}/></li>
                             })}
                         </ul>
                         <footer className='cart-footer'>Total: ${addDecimal(cartTotal)} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
-                        
                     </section>
                 </div>
             )
@@ -249,7 +254,7 @@ const Product = (props) => {
         addCartItem(item);
     }
     return (
-        <section className="product-info">
+        <section key={p.uuid} className="product-info">
           <h3 id="productname">{p.product_name}</h3>
           <p>${addDecimal(p.price)}</p>
           <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
@@ -273,7 +278,7 @@ const CartItem = (props) => {
         submitCartDelete(ci);
     }
     return (
-        <section className='cart-item-li'>
+        <section key={ci.uuid} className='cart-item-li'>
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>

@@ -10,8 +10,8 @@ import Landing from './components/Landing';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Landing/>}/>
       <Route element={<> <Navbar/> <Outlet /></>}>
+        <Route path="/" element={<Landing/>}/>
         <Route path="/shoppingCart" element={<ShoppingCart/>}/>
         <Route path="/userOrders" element={<Orders/>}/>
         <Route path="/adminProducts" element={<Products/>}/>

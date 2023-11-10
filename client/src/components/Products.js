@@ -143,7 +143,7 @@ const Product = (props) => {
     }
     const [showEditProduct, setShowEditProduct] = useState(false); //show and hide edit menu
     return (
-        <section className="product-info">
+        <section key={p.uuid} className="product-info">
             <h3 id="productname">{p.product_name}</h3>
             <img className="product-list-img" src={p.image_url} alt={p.product_name} />
             <p>${addDecimal(p.price)}</p>

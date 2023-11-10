@@ -48,7 +48,7 @@ const updateProduct = async (req, res) => {
                 }
             })
             cartItemsToUpdate.map(async ci => {
-                ci.price = prodToUpdate.price;
+                ci.price = prodToUpdate.price * ci.quantity;
                 ci.prouct_name = prodToUpdate.product_name;
                 ci.image_url = prodToUpdate.image_url;
                 await ci.save()

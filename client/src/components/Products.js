@@ -119,7 +119,7 @@ export default function Products() {
                 <h1>All products</h1>
                 <section className='products-grid'>
                     {products.map(p => {
-                        return <Product p={p} submitProductUpdate={submitProductUpdate} submitProductDelete={submitProductDelete}/>
+                        return <Product key={p.uuid} p={p} submitProductUpdate={submitProductUpdate} submitProductDelete={submitProductDelete}/>
                     })}
                 </section>
                 <section className='add-product'>

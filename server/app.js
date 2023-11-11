@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000
 
 const app = express();
 app.use(cookieParser());
-app.use(cors({ origin: "*"}))
+app.use(cors({ origin: "http://localhost:3001"}))
 app.use(express.json());
 
 

@@ -150,7 +150,12 @@ export default function ShoppingCart() {
             }, 750)
         } else {
             setOpenSnackbar(true);
-            setSnackbarMessage("Removing item...");
+            setSnackbarMessage("Removal failed.");
+            setTimeout(() => {
+                setOpenSnackbar(false);
+                setSnackbarMessage("");
+                getCartItems();
+            }, 750)
         }
     }
 

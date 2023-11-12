@@ -1,6 +1,7 @@
 const host = process.env.REACT_APP_BASEURL_LOCAL || process.env.REACT_APP_BASEURL_PROD
 export const handleGet = async (endpoint, setDataInComponent) => {
-    const url = `${host}/${endpoint}`
+    //const url = `${host}/${endpoint}`
+    const url = `http://localhost:3000/${endpoint}`
     console.log(url);
     await fetch(url, {
         method: 'GET',

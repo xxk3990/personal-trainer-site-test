@@ -1,7 +1,8 @@
-const host = process.env.REACT_APP_BASEURL_LOCAL || process.env.REACT_APP_BASEURL_PROD
+const NODE_URL = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
 export const handleGet = async (endpoint, setDataInComponent) => {
-    //const url = `${host}/${endpoint}`
-    const url = `http://localhost:3000/${endpoint}`
+    console.log("server:", NODE_URL)
+    const url = `${NODE_URL}/${endpoint}`
+    //const url = `http://localhost:3000/${endpoint}`
     console.log(url);
     await fetch(url, {
         method: 'GET',
@@ -19,7 +20,7 @@ export const handleGet = async (endpoint, setDataInComponent) => {
 }
 
 export const handlePost = async (endpoint, body) => {
-    const url = `${host}/${endpoint}`;
+    const url = `${NODE_URL}/${endpoint}`;
         const requestParams = {
             method: 'POST',
             headers: {
@@ -33,7 +34,7 @@ export const handlePost = async (endpoint, body) => {
 }
 
 export const handlePut = async (endpoint, body) => {
-    const url = `${host}/${endpoint}`;
+    const url = `${NODE_URL}/${endpoint}`;
     const requestParams = {
         method: "PUT",
         headers: {
@@ -47,7 +48,7 @@ export const handlePut = async (endpoint, body) => {
 }
 
 export const handleDelete = (endpoint) => {
-    const url = `${host}/${endpoint}`
+    const url = `${NODE_URL}/${endpoint}`
     const requestParams = {
         method: 'DELETE',
         headers: {

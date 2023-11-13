@@ -20,7 +20,7 @@ export default function ShoppingCart() {
 
     const getCartItems = async () => {
         //Couldn't use default request service handleGet method as I also had to calc the order total on load
-        const host = process.env.REACT_APP_BASEURL_LOCAL || process.env.REACT_APP_BASEURL_PROD
+        const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
         const url = `${host}/cartItems`
         await fetch(url, {
             method: 'GET',

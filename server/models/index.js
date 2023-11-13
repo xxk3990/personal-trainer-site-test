@@ -16,7 +16,8 @@ const { cartItemModel } = require("./cart-item")
 const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
 
 const sequelize = new Sequelize(config.database, config.username, config.password, {
-  host: environment === 'production' ? process.env.AWS_HOST : 'localhost',
+  //host: environment === 'production' ? process.env.AWS_HOST : 'localhost',
+  host: 'localhost',
   port: 5432,
   logging: console.log,
   dialect: 'postgres',

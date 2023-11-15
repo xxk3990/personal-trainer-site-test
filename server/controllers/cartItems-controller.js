@@ -35,6 +35,7 @@ const createCartItem = async (req, res) => {
             product_uuid: req.body.product_uuid,
             price: req.body.price,
             image_url: req.body.image_url,
+            place_in_cart: req.body.place_in_cart,
         }
         const dataForFE = {
             price: req.body.price,
@@ -48,7 +49,7 @@ const createCartItem = async (req, res) => {
 const updateCartItem = async (req, res, next) => {
     const itemToUpdate = await models.Cart_Item.findOne({
         where: {
-            "product_uuid": req.body.item.product_uuid
+            "uuid": req.body.item.uuid
         }
     })
     if (itemToUpdate.length === 0) {
@@ -70,13 +71,28 @@ const updateCartItem = async (req, res, next) => {
 }
 
 const deleteCartItem = async (req, res) => {
+    const itemBeingDeleted = await models.Cart_Item.findOne({
+        where: {
+            'uuid': req.query.item
+        }
+    });
     try {
-        res.status(200).send()
-        return models.Cart_Item.destroy({
-            where: {
-                'product_uuid': req.query.product
-            }
-        });
+        models.sequelize.transaction(async () => {
+            models.Cart_Item.destroy({
+                where: {
+                    'uuid': req.query.item
+                }
+            });
+            const allItems = await models.Cart_Item.findAll() //in future add where user_uuid equals user id
+            allItems.map(async item => {
+                if(item.place_in_cart > itemBeingDeleted.place_in_cart) {
+                    item.place_in_cart -= 1; //reduce place in cart of all items after this by 1
+                    await item.save();
+                }
+            })
+            res.status(200).send()
+        })
+        
     } catch {
         return res.status(400).send()
     }

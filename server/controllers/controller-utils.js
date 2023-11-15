@@ -1,4 +1,4 @@
-const removeDecimalIfNeeded = (amount) => {
+const removeDecimalOrAddZeros = (amount) => {
     const priceString = amount.toString();
     if(priceString[priceString.length - 3] === '.' || priceString[priceString.length - 2] === '.') { //if it contains a decimal
         const removeDecPoint = priceString.split('.') //separate each side of the decimal point
@@ -21,4 +21,4 @@ const integerTest = (amount) => {
     }
 }
 
-module.exports = {removeDecimalIfNeeded, integerTest, addDecimal}
+module.exports = {removeDecimalOrAddZeros, integerTest, addDecimal}

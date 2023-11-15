@@ -12,6 +12,7 @@ module.exports = {
       product_name: Sequelize.STRING,
       image_url: Sequelize.STRING,
       price: Sequelize.INTEGER,
+      place_in_catalog: Sequelize.INTEGER,
       created_at: {
         allowNull: false,
         type: Sequelize.DATE

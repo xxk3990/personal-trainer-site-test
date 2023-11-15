@@ -31,7 +31,9 @@ export default function ShoppingCart() {
                 setCartItems([]); 
             } else {
                 setCartTotal(responseData.cart_total)
-                setCartItems(responseData.cart_items) //set it equal to data from API
+                //sort response data by place in cart (newer items at the end) so order can't change
+                const sortedCart = responseData.cart_items.sort((x, y) => x.place_in_cart - y.place_in_cart)
+                setCartItems(sortedCart) //set it equal to data from API
             }
             
         })
@@ -47,7 +49,7 @@ export default function ShoppingCart() {
 
 
     const addCartItem = async(item) => {
-        const endpoint = `addToCart`
+        const endpoint = `cartItems`
         const tempCart = [...cartItems];
         const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
         if(itemIndex === -1) { //if it does not exist in the cart items, do POST request
@@ -57,13 +59,13 @@ export default function ShoppingCart() {
                 quantity: item.quantity,
                 product_name: item.product_name,
                 price: item.price,
-                image_url: item.image_url
+                image_url: item.image_url,
+                place_in_cart: cartItems.length + 1
             }
             console.log("new item price:", item.price);
             try {
                 const response = await handlePost(endpoint, requestBody)
                 if(response.status === 200 || response.status === 201) {
-                    const data = await response.json();
                     console.log()
                     if(cartItems.length === 0) {
                         setCartItems([...cartItems, item])
@@ -71,7 +73,6 @@ export default function ShoppingCart() {
                         tempCart.push({...item, quantity: item.quantity})
                         setCartItems(tempCart)
                     }
-                    
                     getCartItems()
                 }
             } catch {
@@ -123,7 +124,7 @@ export default function ShoppingCart() {
     }
 
     const submitCartUpdate = async (item) => {
-        const endpoint = `updateCartItem`
+        const endpoint = `cartItems`
         console.log(item)
         const requestBody = {
             item: item,
@@ -138,7 +139,7 @@ export default function ShoppingCart() {
 
     const submitCartDelete = async(itemToDelete) => {
         setSnackbarMessage("");
-        const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
+        const endpoint = `cartItems?item=${itemToDelete.uuid}`;
         const response = await handleDelete(endpoint)
         setOpenSnackbar(true);
         setSnackbarMessage("Removing item...");
@@ -160,7 +161,7 @@ export default function ShoppingCart() {
     }
 
     const submitOrder = async() => {
-        const endpoint = `submitOrder`;
+        const endpoint = `orders`;
         const today = new Date();
         const requestBody = {
             cart_items: cartItems,

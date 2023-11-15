@@ -10,6 +10,7 @@ const productModel = (sequelize, DataTypes) => {
         product_name: DataTypes.STRING,
         image_url: DataTypes.STRING,
         price: DataTypes.INTEGER,
+        place_in_catalog: DataTypes.INTEGER,
         },
         {
             sequelize,

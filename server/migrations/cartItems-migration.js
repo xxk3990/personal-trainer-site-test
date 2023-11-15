@@ -14,6 +14,7 @@ module.exports = {
       product_uuid: Sequelize.UUID,
       price: Sequelize.INTEGER,
       image_url: Sequelize.STRING,
+      place_in_cart: Sequelize.INTEGER,
       //eventually user uuid will be added which will be a foreign key to the Users table!
       created_at: {
         allowNull: false,

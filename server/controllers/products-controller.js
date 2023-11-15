@@ -14,13 +14,14 @@ const getProducts = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
-    const priceAsInt = utils.removeDecimalIfNeeded(req.body.price) //remove decimal entered on FE
+    const priceAsInt = utils.removeDecimalOrAddZeros(req.body.price) //remove decimal entered on FE
     const newProduct = {
         //id, product_name, image_url, price
         uuid: uuidv4(),
         product_name: req.body.product_name,
         image_url: req.body.image_url, //replace with AWS link later on
-        price: priceAsInt
+        price: priceAsInt,
+        place_in_catalog: req.body.place_in_catalog
     }
     res.status(201).send({
         "message": 'success!'
@@ -37,7 +38,7 @@ const updateProduct = async (req, res) => {
     })
     try {
         models.sequelize.transaction(async () => {
-            prodToUpdate.price = utils.removeDecimalIfNeeded(prod.price);
+            prodToUpdate.price = utils.removeDecimalOrAddZeros(prod.price);
             prodToUpdate.product_name = prod.product_name;
             prodToUpdate.image_url = prod.image_url;
             await prodToUpdate.save();
@@ -62,9 +63,20 @@ const updateProduct = async (req, res) => {
 }
 
 const deleteProduct = async (req, res) => {
+    const productBeingDeleted = await models.Product.findOne({
+        where: {
+            'uuid': req.query.product
+        }
+    });
     try {
         models.sequelize.transaction(async () => {
-
+            const allProducts = await models.Product.findAll()
+            allProducts.map(async prod => {
+                if(prod.place_in_catalog > productBeingDeleted.place_in_catalog) {
+                    prod.place_in_catalog -= 1; //bring all items added after this up one in the catalog
+                    await prod.save();
+                }
+            })
             models.Product.destroy({
                 where: {
                     'uuid': req.query.product

@@ -13,6 +13,7 @@ const cartItemModel = (sequelize, DataTypes) => {
         price: DataTypes.INTEGER,
         image_url: DataTypes.STRING,
         //eventually user uuid will be added which will be a foreign key to the Users table!
+        place_in_cart: DataTypes.INTEGER,
         },
         {
             sequelize,

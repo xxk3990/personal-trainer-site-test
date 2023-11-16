@@ -15,10 +15,10 @@ const router = (app) => {
     //app.get('/allOrders', admin.getAllOrders) not created yet
     app.post('/orders', order.submitOrder)
     app.get('/orderItems', items.getOrderItems);
-    app.get('/cartItems', cart.getCartItems)
-    app.post("/cartItems", cart.createCartItem);
-    app.put('/cartItems', cart.updateCartItem);
-    app.delete("/cartItems", cart.deleteCartItem)
+    app.get('/cart-items', cart.getCartItems)
+    app.post("/cart-items", cart.createCartItem);
+    app.put('/cart-items', cart.updateCartItem);
+    app.delete("/cart-items", cart.deleteCartItem)
 
 
 }

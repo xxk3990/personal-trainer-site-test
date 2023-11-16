@@ -63,20 +63,8 @@ const updateProduct = async (req, res) => {
 }
 
 const deleteProduct = async (req, res) => {
-    const productBeingDeleted = await models.Product.findOne({
-        where: {
-            'uuid': req.query.product
-        }
-    });
     try {
         models.sequelize.transaction(async () => {
-            const allProducts = await models.Product.findAll()
-            allProducts.map(async prod => {
-                if(prod.place_in_catalog > productBeingDeleted.place_in_catalog) {
-                    prod.place_in_catalog -= 1; //bring all items added after this up one in the catalog
-                    await prod.save();
-                }
-            })
             models.Product.destroy({
                 where: {
                     'uuid': req.query.product

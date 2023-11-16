@@ -21,7 +21,7 @@ export default function ShoppingCart() {
     const getCartItems = async () => {
         //Couldn't use default request service handleGet method as I also had to calc the order total on load
         const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
-        const url = `${host}/cartItems`
+        const url = `${host}/cart-items`
         await fetch(url, {
             method: 'GET',
         }).then(response => response.json(),
@@ -31,8 +31,9 @@ export default function ShoppingCart() {
                 setCartItems([]); 
             } else {
                 setCartTotal(responseData.cart_total)
-                //sort response data by place in cart (newer items at the end) so order can't change
-                const sortedCart = responseData.cart_items.sort((x, y) => x.place_in_cart - y.place_in_cart)
+                console.log("cartItems from DB: ", responseData.cart_items)
+                //sort response data by created at (newer items at the end) so order can't change
+                const sortedCart = responseData.cart_items.sort((x, y) => new Date(x.createdAt) - new Date(y.createdAt))
                 setCartItems(sortedCart) //set it equal to data from API
             }
             
@@ -49,7 +50,7 @@ export default function ShoppingCart() {
 
 
     const addCartItem = async(item) => {
-        const endpoint = `cartItems`
+        const endpoint = `cart-items`
         const tempCart = [...cartItems];
         const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
         if(itemIndex === -1) { //if it does not exist in the cart items, do POST request
@@ -60,7 +61,6 @@ export default function ShoppingCart() {
                 product_name: item.product_name,
                 price: item.price,
                 image_url: item.image_url,
-                place_in_cart: cartItems.length + 1
             }
             console.log("new item price:", item.price);
             try {
@@ -124,7 +124,7 @@ export default function ShoppingCart() {
     }
 
     const submitCartUpdate = async (item) => {
-        const endpoint = `cartItems`
+        const endpoint = `cart-items`
         console.log(item)
         const requestBody = {
             item: item,

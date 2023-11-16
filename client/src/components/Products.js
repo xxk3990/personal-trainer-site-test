@@ -28,7 +28,7 @@ export default function Products() {
                 setProducts([]); 
             } else {
                 //sort data so updates don't mess with the order of the products in the list
-                const sortedCatalog = responseData.sort((x, y) => x.place_in_catalog - y.place_in_catalog)
+                const sortedCatalog = responseData.sort((x, y) => new Date(x.createdAt) - new Date(y.createdAt))
                 setProducts(sortedCatalog) //set it equal to data from API
             }
             
@@ -50,7 +50,6 @@ export default function Products() {
             product_name: newProduct.productName,
             image_url: newProduct.imageURL,
             price: newProduct.price,
-            place_in_catalog: products.length + 1
         }
         try {
             const response = await handlePost(endpoint, requestBody)

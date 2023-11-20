@@ -21,7 +21,6 @@ const addProduct = async (req, res) => {
         product_name: req.body.product_name,
         image_url: req.body.image_url, //replace with AWS link later on
         price: priceAsInt,
-        place_in_catalog: req.body.place_in_catalog
     }
     res.status(201).send({
         "message": 'success!'

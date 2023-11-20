@@ -36,23 +36,19 @@ const createCartItem = async (req, res) => {
             price: req.body.price,
             image_url: req.body.image_url,
         }
-        const dataForFE = {
-            price: req.body.price,
-            quantity: req.body.quantity
-        }
         await models.Cart_Item.create(newCartItem)
-        return res.status(200).send(dataForFE);
+        return res.status(200).send();
     }
 }
 
 const updateCartItem = async (req, res, next) => {
     const itemToUpdate = await models.Cart_Item.findOne({
         where: {
-            "product_uuid": req.body.item.product_uuid
+            "uuid": req.body.item.uuid
         }
     })
-    if (itemToUpdate.length === 0) {
-        return res.status(304).send() //send "Not Modified" status code to FE
+    if (!itemToUpdate) {
+        return res.status(404).send() //send "not found" status code to FE
     } else {
         try {
             const item = req.body.item;
@@ -63,6 +59,7 @@ const updateCartItem = async (req, res, next) => {
         } catch (error) {
             console.log("PUT error: ",error)
             next(error)
+            return res.status(304).send() //send not modified here if it fails
         }
     }
 
@@ -71,12 +68,12 @@ const updateCartItem = async (req, res, next) => {
 
 const deleteCartItem = async (req, res) => {
     try {
-        res.status(200).send()
-        return models.Cart_Item.destroy({
+        models.Cart_Item.destroy({
             where: {
-                'product_uuid': req.query.product
+                'uuid': req.query.item
             }
         });
+        res.status(200).send()
     } catch {
         return res.status(400).send()
     }

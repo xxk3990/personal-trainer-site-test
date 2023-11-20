@@ -21,7 +21,7 @@ export default function ShoppingCart() {
     const getCartItems = async () => {
         //Couldn't use default request service handleGet method as I also had to calc the order total on load
         const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
-        const url = `${host}/cartItems`
+        const url = `${host}/cart-items`
         await fetch(url, {
             method: 'GET',
         }).then(response => response.json(),
@@ -31,7 +31,10 @@ export default function ShoppingCart() {
                 setCartItems([]); 
             } else {
                 setCartTotal(responseData.cart_total)
-                setCartItems(responseData.cart_items) //set it equal to data from API
+                console.log("cartItems from DB: ", responseData.cart_items)
+                //sort response data by created at (newer items at the end) so order can't change
+                const sortedCart = responseData.cart_items.sort((x, y) => new Date(x.createdAt) - new Date(y.createdAt))
+                setCartItems(sortedCart) //set it equal to data from API
             }
             
         })
@@ -47,7 +50,7 @@ export default function ShoppingCart() {
 
 
     const addCartItem = async(item) => {
-        const endpoint = `addToCart`
+        const endpoint = `cart-items`
         const tempCart = [...cartItems];
         const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
         if(itemIndex === -1) { //if it does not exist in the cart items, do POST request
@@ -57,13 +60,12 @@ export default function ShoppingCart() {
                 quantity: item.quantity,
                 product_name: item.product_name,
                 price: item.price,
-                image_url: item.image_url
+                image_url: item.image_url,
             }
             console.log("new item price:", item.price);
             try {
                 const response = await handlePost(endpoint, requestBody)
                 if(response.status === 200 || response.status === 201) {
-                    const data = await response.json();
                     console.log()
                     if(cartItems.length === 0) {
                         setCartItems([...cartItems, item])
@@ -71,7 +73,6 @@ export default function ShoppingCart() {
                         tempCart.push({...item, quantity: item.quantity})
                         setCartItems(tempCart)
                     }
-                    
                     getCartItems()
                 }
             } catch {
@@ -95,11 +96,11 @@ export default function ShoppingCart() {
     const decreaseCartItem = (itemReduced) => {
         const tempCart = [...cartItems];
         if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
-            if(cartItems.length === 1) {
+            if(cartItems.length === 1) { //if it is the last item in the cart, reset everything after deleting
                 submitCartDelete(itemReduced);
                 setCartItems([])
                 setCartTotal(0);
-            } else {
+            } else { //if not, only take it out of the cart
                 const filteredCart = tempCart.filter((c) => {
                     return c !== itemReduced;
                 })
@@ -123,11 +124,10 @@ export default function ShoppingCart() {
     }
 
     const submitCartUpdate = async (item) => {
-        const endpoint = `updateCartItem`
+        const endpoint = `cart-items`
         console.log(item)
         const requestBody = {
             item: item,
-            price: item.price
         }
         console.log('updated item price:',item.price);
         const response = await handlePut(endpoint, requestBody);
@@ -138,7 +138,7 @@ export default function ShoppingCart() {
 
     const submitCartDelete = async(itemToDelete) => {
         setSnackbarMessage("");
-        const endpoint = `deleteCartItem?product=${itemToDelete.product_uuid}`;
+        const endpoint = `cart-items?item=${itemToDelete.uuid}`;
         const response = await handleDelete(endpoint)
         setOpenSnackbar(true);
         setSnackbarMessage("Removing item...");
@@ -160,7 +160,7 @@ export default function ShoppingCart() {
     }
 
     const submitOrder = async() => {
-        const endpoint = `submitOrder`;
+        const endpoint = `orders`;
         const today = new Date();
         const requestBody = {
             cart_items: cartItems,

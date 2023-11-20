@@ -1,6 +1,6 @@
 import React  from 'react';
 import { useState, useEffect} from 'react';
-import { handleGet, handlePost, handlePut, handleDelete } from '../services/requests-service';
+import {handlePost, handlePut, handleDelete } from '../services/requests-service';
 import '../styles/products.css';
 import { Snackbar } from '@mui/material';
 import { addDecimal } from '../util-methods';
@@ -18,7 +18,21 @@ export default function Products() {
 
     const getProducts = async () => {
         const endpoint = `products`
-        await handleGet(endpoint, setProducts)
+        const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
+        const url = `${host}/${endpoint}`
+        await fetch(url, {
+            method: 'GET',
+        }).then(response => response.json(),
+        []).then(responseData => {
+            if(!responseData) {
+                setProducts([]); 
+            } else {
+                //sort data so updates don't mess with the order of the products in the list
+                const sortedCatalog = responseData.sort((x, y) => new Date(x.createdAt) - new Date(y.createdAt))
+                setProducts(sortedCatalog) //set it equal to data from API
+            }
+            
+        })
     }
 
     useEffect(() => {
@@ -31,11 +45,11 @@ export default function Products() {
     }
 
     const submitProduct = async() => {
-        const endpoint = `addProduct`;
+        const endpoint = `products`;
         const requestBody = {
             product_name: newProduct.productName,
             image_url: newProduct.imageURL,
-            price: newProduct.price
+            price: newProduct.price,
         }
         try {
             const response = await handlePost(endpoint, requestBody)
@@ -64,7 +78,7 @@ export default function Products() {
     }
 
     const submitProductUpdate = async (product, showEditProduct, setShowEditProduct) => {
-        const endpoint = `updateProduct`
+        const endpoint = `products`
         console.log(product)
         const requestBody = {
             product: product,
@@ -85,7 +99,7 @@ export default function Products() {
     }
 
     const submitProductDelete = async (prodToDelete) => {
-        const endpoint = `deleteProduct?product=${prodToDelete.uuid}`
+        const endpoint = `products?product=${prodToDelete.uuid}`
         const response = await handleDelete(endpoint)
         if(response.status === 200) {
             setOpenSnackbar(true);
@@ -105,9 +119,33 @@ export default function Products() {
             <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
             <h4>No products yet!</h4>
             <section className='add-product'>
-                <span className='product-form-question' id="productname">Product Name: <input type="text" className='user-input' name="productName" value={newProduct.productName} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
-                <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" value={newProduct.imageURL} onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
-                <span className='product-form-question' id="productprice">Product Price: <input type="number" min="0" max="3500" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
+                <span className='product-form-question' id="productname">
+                    Product Name: 
+                    <input type="text" 
+                    className='user-input' 
+                    name="productName" 
+                    value={newProduct.productName} 
+                    onChange={e => handleChange(e.target.name, e.target.value)} required/>
+                </span>
+                <span className='product-form-question' id="product-image-url">
+                    Product Image: 
+                    <input type="text" 
+                    className='user-input' 
+                    id="product-img" 
+                    name="imageURL" 
+                    value={newProduct.imageURL} 
+                    onChange={e => handleChange(e.target.name, e.target.value)} 
+                    required 
+                    placeholder='Please paste a proper link.'/>
+                </span>
+                <h5>You do not need to add the .00 for non-decimal prices, the site will do it for you! </h5>
+                <span className='product-form-question' id="productprice">Product Price: 
+                    <input type="text" 
+                    className='user-input' 
+                    name="price" 
+                    value={newProduct.price} 
+                    onChange={e => handleChange(e.target.name, e.target.value)} required/>
+                </span>
                 <button type='button' onClick={submitProduct}>Submit</button>
             </section>
         </div>
@@ -115,7 +153,12 @@ export default function Products() {
     } else {
         return (
             <div className='Products'>
-                <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
+                <Snackbar 
+                    open={openSnackbar} 
+                    autoHideDuration={1500} 
+                    message={snackbarMessage} 
+                    anchorOrigin={{horizontal: "center", vertical:"top"}}
+                />
                 <h1>All products</h1>
                 <section className='products-grid'>
                     {products.map(p => {
@@ -123,10 +166,32 @@ export default function Products() {
                     })}
                 </section>
                 <section className='add-product'>
-                    <span className='product-form-question' id="productname">Product Name: <input type="text" className='user-input' name="productName" value={newProduct.productName} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
-                    <span className='product-form-question' id="productimageUrl">Product Image: <input type="text" className='user-input' id="product-img" name="imageURL" onChange={e => handleChange(e.target.name, e.target.value)} required placeholder='Please paste a proper link.'/></span>
+                    <span className='product-form-question' id="productname">
+                        Product Name: 
+                        <input type="text" 
+                        className='user-input' 
+                        name="productName" 
+                        value={newProduct.productName} 
+                        onChange={e => handleChange(e.target.name, e.target.value)} required/>
+                    </span>
+                    <span className='product-form-question' id="productimage_url">
+                        Product Image: 
+                        <input type="text" 
+                        className='user-input' 
+                        id="product-img" name="imageURL" 
+                        value={newProduct.imageURL} 
+                        onChange={e => handleChange(e.target.name, e.target.value)} 
+                        required placeholder='Please paste a proper link.'/>
+                    </span>
                     <h5>You do not need to add the .00 for non-decimal prices, the site will do it for you! </h5>
-                    <span className='product-form-question' id="productprice">Product Price: <input type="text" className='user-input' name="price" value={newProduct.price} onChange={e => handleChange(e.target.name, e.target.value)} required/></span>
+                    <span className='product-form-question' id="productprice">
+                        Product Price: 
+                        <input type="text" 
+                        className='user-input' 
+                        name="price" 
+                        value={newProduct.price} 
+                        onChange={e => handleChange(e.target.name, e.target.value)} required/>
+                    </span>
                     <button type='button' onClick={submitProduct}>Submit</button>
                 </section>
             </div>
@@ -152,7 +217,14 @@ const Product = (props) => {
                 <button className='show-hide-edit-btn' onClick={handleDelete}>Delete</button>
             </span>
             {/* Below code shows the menu based on the boolean value and passes in the submit update from the parent. */}
-            {showEditProduct ? <EditProduct p = {p} submitProductUpdate={submitProductUpdate} showEditProduct={showEditProduct} setShowEditProduct={setShowEditProduct}/> : null}
+            {showEditProduct ? 
+            <EditProduct 
+                p = {p} 
+                submitProductUpdate={submitProductUpdate} 
+                showEditProduct={showEditProduct} 
+                setShowEditProduct={setShowEditProduct}
+            /> 
+            : null}
         </section>
     )
 }
@@ -179,9 +251,30 @@ const EditProduct = (props) => {
     }
     return ( 
         <section className='product-edit-form'>
-            <span className='product-update-display'><h4>Name:</h4><input className='product-update-input' name="product_name" type="text" value={updatedProduct.product_name} onChange={e => handleChange(e.target.name, e.target.value)}/></span>
-            <span className='product-update-display'><h4>Image:</h4><input className='product-update-input' name="image_url" type="text" value={updatedProduct.image_url} onChange={e => handleChange(e.target.name, e.target.value)}/></span>
-            <span className='product-update-display'><h4>Price:</h4><input className='product-update-input' type="text" name="price" value={updatedProduct.price} onChange={e => handleChange(e.target.name, e.target.value)}/></span>
+            <span className='product-update-display'>
+                <h4>Name:</h4>
+                <input className='product-update-input' 
+                name="product_name" 
+                type="text" 
+                value={updatedProduct.product_name} 
+                onChange={e => handleChange(e.target.name, e.target.value)}/>
+            </span>
+            <span className='product-update-display'>
+                <h4>Image:</h4>
+                <input className='product-update-input' 
+                name="image_url" 
+                type="text" 
+                value={updatedProduct.image_url} 
+                onChange={e => handleChange(e.target.name, e.target.value)}/>
+            </span>
+            <span className='product-update-display'>
+                <h4>Price:</h4>
+                <input className='product-update-input' 
+                type="text" 
+                name="price" 
+                value={updatedProduct.price} 
+                onChange={e => handleChange(e.target.name, e.target.value)}/>
+            </span>
             <button onClick = {submitUpdate}>Submit Changes</button>
         </section>
     )

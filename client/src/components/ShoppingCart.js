@@ -96,11 +96,11 @@ export default function ShoppingCart() {
     const decreaseCartItem = (itemReduced) => {
         const tempCart = [...cartItems];
         if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
-            if(cartItems.length === 1) {
+            if(cartItems.length === 1) { //if it is the last item in the cart, reset everything after deleting
                 submitCartDelete(itemReduced);
                 setCartItems([])
                 setCartTotal(0);
-            } else {
+            } else { //if not, only take it out of the cart
                 const filteredCart = tempCart.filter((c) => {
                     return c !== itemReduced;
                 })
@@ -128,7 +128,6 @@ export default function ShoppingCart() {
         console.log(item)
         const requestBody = {
             item: item,
-            price: item.price
         }
         console.log('updated item price:',item.price);
         const response = await handlePut(endpoint, requestBody);
@@ -139,7 +138,7 @@ export default function ShoppingCart() {
 
     const submitCartDelete = async(itemToDelete) => {
         setSnackbarMessage("");
-        const endpoint = `cartItems?item=${itemToDelete.uuid}`;
+        const endpoint = `cart-items?item=${itemToDelete.uuid}`;
         const response = await handleDelete(endpoint)
         setOpenSnackbar(true);
         setSnackbarMessage("Removing item...");

@@ -46,8 +46,8 @@ if(environment === 'development') {
   connectionOptions.host = "localhost" //change to localhost
 } else if(environment === 'production') {
   connectionOptions.host = ""; //clear existing value
-  connectionOptions.dialectOptions = {}; //clear existing object
   connectionOptions.host = process.env.RDS_HOSTNAME; //change host to RDS URL
+  connectionOptions.dialectOptions = {}; //clear existing object
   connectionOptions.dialectOptions = { //change dialect options to require SSL
     connectTimeout: 60000,
     ssl: {

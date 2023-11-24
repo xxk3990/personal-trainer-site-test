@@ -58,7 +58,7 @@ if(environment === 'development') {
   }
 }
 
-console.log('connection options:', connectionOptions)
+
 
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   host: connectionOptions.host,
@@ -69,6 +69,8 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   pool: connectionOptions.pool,
   dialectOptions: connectionOptions.dialectOptions
 })
+
+console.log('sequelize:', sequelize)
 
 
 const models = {

@@ -4,26 +4,74 @@ const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
-const environment = 'development';
-//const process = require("process")
+const process = require("process")
+const environment = process.env.NODE_ENV;
 const config = require(`${__dirname}/../config/config.js`)[environment];
 const db = {};
 const bcrypt = require("bcrypt");
-const { productModel } = require('./product');
-const { orderModel } = require("./order")
-const { orderItemModel } = require("./order-item");
-const { cartItemModel } = require("./cart-item")
+const {
+  productModel
+} = require('./product');
+const {
+  orderModel
+} = require("./order")
+const {
+  orderItemModel
+} = require("./order-item");
+const {
+  cartItemModel
+} = require("./cart-item");
 const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
 
-const sequelize = new Sequelize(config.database, config.username, config.password, {
-  //host: environment === 'production' ? process.env.AWS_HOST : 'localhost',
-  host: 'localhost',
+const connectionOptions = {
+  host: "",
   port: 5432,
   logging: console.log,
   dialect: 'postgres',
-  pool: { maxConnections: 5, maxIdleTime: 30},
   language: 'en',
+  pool: {
+    max: 40,
+    acquire: 6000,
+    idle: 6000,
+    size: 20
+  },
+  dialectOptions: {
+    connectTimeout: 60000,
+  }
+}
+
+if(environment === 'development') {
+  //change host based on environment
+  connectionOptions.host = ""; //clear existing value
+  connectionOptions.host = "localhost" //change to localhost
+} else if(environment === 'production') {
+  connectionOptions.host = ""; //clear existing value
+  connectionOptions.host = process.env.RDS_HOSTNAME; //change host to RDS URL
+  connectionOptions.dialectOptions = {}; //clear existing object
+  connectionOptions.dialectOptions = { //change dialect options to require SSL
+    connectTimeout: 60000,
+    ssl: {
+      rejectUnauthorized: true,
+      ca: [rdsCa]
+    }
+
+  }
+}
+
+
+
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  host: connectionOptions.host,
+  port: connectionOptions.port,
+  logging: connectionOptions.logging,
+  dialect: connectionOptions.dialect,
+  language: connectionOptions.language,
+  pool: connectionOptions.pool,
+  dialectOptions: connectionOptions.dialectOptions
 })
+
+console.log('sequelize:', sequelize)
+
 
 const models = {
   Product: productModel(sequelize, Sequelize.DataTypes),
@@ -43,15 +91,15 @@ fs
     );
   })
   .forEach(() => {
-    for(const m of Object.values(models)) {
+    for (const m of Object.values(models)) {
       db[m.name] = m;
     }
-    
+
   });
-  models.Order.hasMany(models.Order_Item, {
-    as: "items_in_order",
-    foreignKey: "order_uuid"
-  })
+models.Order.hasMany(models.Order_Item, {
+  as: "items_in_order",
+  foreignKey: "order_uuid"
+})
 
 
 

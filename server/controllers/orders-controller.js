@@ -35,9 +35,9 @@ const submitOrder = async (req, res) => { //add transactional integrity
                         product_uuid: item.product_uuid,
                         quantity: item.quantity
                     })
-                    await models.Cart_Item.destroy({
+                    await models.Cart_Item.destroy({ //delete all cart items with uuid matches
                         where: {
-                            "product_uuid": item.product_uuid
+                            "uuid": item.uuid
                         }
                     })
                 })

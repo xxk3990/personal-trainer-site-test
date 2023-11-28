@@ -18,9 +18,6 @@ const {
 const {
   orderItemModel
 } = require("./order-item");
-const {
-  cartItemModel
-} = require("./cart-item");
 const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
 
 const connectionOptions = {
@@ -77,7 +74,6 @@ const models = {
   Product: productModel(sequelize, Sequelize.DataTypes),
   Order: orderModel(sequelize, Sequelize.DataTypes),
   Order_Item: orderItemModel(sequelize, Sequelize.DataTypes),
-  Cart_Item: cartItemModel(sequelize, Sequelize.DataTypes)
 }
 
 fs

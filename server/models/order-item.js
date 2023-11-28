@@ -13,6 +13,7 @@ const orderItemModel = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        item_price: DataTypes.INTEGER,
     },
     {
         sequelize,

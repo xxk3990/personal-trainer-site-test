@@ -18,10 +18,10 @@ export default function ShoppingCart() {
         await handleGet(endpoint, setProducts)
     }
 
-    const getCartItems = async () => {
+    const getCartItems = async (orderID) => {
         //Couldn't use default request service handleGet method as I also had to calc the order total on load
         const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
-        const url = `${host}/cart-items`
+        const url = `${host}/order-items?orderID=${orderID}`
         await fetch(url, {
             method: 'GET',
         }).then(response => response.json(),
@@ -40,57 +40,69 @@ export default function ShoppingCart() {
         })
     }
 
-    const calcUnitPrice = (price, quantity) => price / quantity;
 
     useEffect(() => {
         document.title = "Shopping Cart"
         getProducts()
-        getCartItems();
     }, []);
 
 
     const addCartItem = async(item) => {
-        const endpoint = `cart-items`
-        const tempCart = [...cartItems];
-        const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
-        if(itemIndex === -1) { //if it does not exist in the cart items, do POST request
+        //if cart is empty, POST to new order. Create order method on BE creates first order_item.
+        if(cartItems.length === 0) { 
+            const today = new Date()
+            const endpoint = `orders`
             const requestBody = {
-                cartItem: item,
-                product_uuid: item.product_uuid,
-                quantity: item.quantity,
-                product_name: item.product_name,
-                price: item.price,
-                image_url: item.image_url,
+                item: item,
+                order_date: `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`,
+                order_total: item.price
             }
-            console.log("new item price:", item.price);
             try {
                 const response = await handlePost(endpoint, requestBody)
                 if(response.status === 200 || response.status === 201) {
-                    console.log()
-                    if(cartItems.length === 0) {
-                        setCartItems([...cartItems, item])
-                    } else {
-                        tempCart.push({...item, quantity: item.quantity})
-                        setCartItems(tempCart)
-                    }
-                    getCartItems()
+                    const data = await response.json();
+                    console.log(data)
+                    setCartItems([...cartItems, item])
+                    getCartItems(data.order_uuid)
+                    localStorage.setItem("orderID", data.order_uuid)
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
             } 
-        } else { //if it does, update quantity and price and then call submit update method
-            const prod = tempCart[itemIndex];
-            console.log("PUT code hit")
-            const unitPrice = calcUnitPrice(prod.price, prod.quantity)
-            console.log("PUT Unit price:", unitPrice)
-            tempCart[itemIndex] = {
-                ...prod, 
-                quantity: prod.quantity + 1,
-                price: prod.price + unitPrice
+        } else {
+            const endpoint = `order-items`
+            const tempCart = [...cartItems];
+            const itemIndex = tempCart.findIndex((ci) => item.product_uuid === ci.product_uuid)
+            if(itemIndex === -1) { //if it does not exist in the cart but cart len is not 0, POST to /order-items
+                const orderID = localStorage.getItem("orderID")
+                const requestBody = {
+                    product_uuid: item.product_uuid,
+                    quantity: item.quantity,
+                    order_uuid: orderID
+                }
+                try {
+                    const response = await handlePost(endpoint, requestBody)
+                    if(response.status === 200 || response.status === 201) {
+                        console.log()
+                        tempCart.push({...item, quantity: item.quantity})
+                        setCartItems(tempCart)
+                        getCartItems(orderID);
+                    }
+                } catch {
+                    alert("An error occurred and the item could not be added.")
+                } 
+            } else { //if it does, update quantity and price and then call submit update method
+                const itemToIncrease = tempCart[itemIndex];
+                console.log("PUT code hit")
+                tempCart[itemIndex] = {
+                    ...itemToIncrease, 
+                    quantity: itemToIncrease.quantity + 1,
+                }
+                setCartItems(tempCart);
+                submitCartUpdate(tempCart[itemIndex]) //submit item update to DB
             }
-            setCartItems(tempCart);
-            submitCartUpdate(tempCart[itemIndex]) //submit item update to DB
         }
+        
     }
 
     const decreaseCartItem = (itemReduced) => {
@@ -110,35 +122,33 @@ export default function ShoppingCart() {
         } else { //if quantity is > 1, reduce quantity and price and call submit update to DB instead
             const reducedItemIndex = tempCart.findIndex((product) => itemReduced.product_uuid === product.product_uuid)
             const reducedItem = tempCart[reducedItemIndex];
-            const unitPrice = calcUnitPrice(reducedItem.price, itemReduced.quantity) //divide the price by the quantity to get the original cost
             tempCart[reducedItemIndex] = {
                 ...reducedItem, 
-                //subtract the current price by the price of one of its items. If its an int, leave as is. If decimal, round
-                price: reducedItem.price - unitPrice,
                 quantity: reducedItem.quantity - 1,
             }
             setCartItems(tempCart)
             submitCartUpdate(tempCart[reducedItemIndex]); //submit update to DB
+            localStorage.removeItem("orderID");
         }
         
     }
 
     const submitCartUpdate = async (item) => {
-        const endpoint = `cart-items`
+        const endpoint = `order-items`
         console.log(item)
         const requestBody = {
             item: item,
+            cart_total: cartTotal,
         }
-        console.log('updated item price:',item.price);
         const response = await handlePut(endpoint, requestBody);
         if(response.status === 200 || response.status === 201) {
-            getCartItems();
+            getCartItems(item.order_uuid);
         }
     }
 
     const submitCartDelete = async(itemToDelete) => {
         setSnackbarMessage("");
-        const endpoint = `cart-items?item=${itemToDelete.uuid}`;
+        const endpoint = `order-items?item=${itemToDelete.uuid}`;
         const response = await handleDelete(endpoint)
         setOpenSnackbar(true);
         setSnackbarMessage("Removing item...");
@@ -154,7 +164,7 @@ export default function ShoppingCart() {
             setTimeout(() => {
                 setOpenSnackbar(false);
                 setSnackbarMessage("");
-                getCartItems();
+                getCartItems(itemToDelete.order_uuid);
             }, 750)
         }
     }
@@ -168,7 +178,7 @@ export default function ShoppingCart() {
             order_total: cartTotal,
         }
         try {
-            const response = await handlePost(endpoint, requestBody);
+            const response = await handlePut(endpoint, requestBody);
             if(response.status === 200 || response.status === 201) {
                 setSnackbarMessage("") //clear current msg
                 setOpenSnackbar(true);
@@ -178,6 +188,7 @@ export default function ShoppingCart() {
                     setCartItems([]);
                     setCartTotal(0);
                     setSnackbarMessage("");
+                    localStorage.removeItem("orderID");
                 }, 1500)
             } else {
                 setOpenSnackbar(true);

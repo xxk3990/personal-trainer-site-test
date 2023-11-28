@@ -42,17 +42,16 @@ const updateProduct = async (req, res) => {
             prodToUpdate.image_url = prod.image_url;
             await prodToUpdate.save();
             //update all corresponding active cart items if product is updated
-            const cartItemsToUpdate = await models.Cart_Item.findAll({
-                where: {
-                    "product_uuid": prodToUpdate.uuid
-                }
-            })
-            cartItemsToUpdate.map(async ci => {
-                ci.price = prodToUpdate.price * ci.quantity;
-                ci.prouct_name = prodToUpdate.product_name;
-                ci.image_url = prodToUpdate.image_url;
-                await ci.save()
-            })
+            // const cartItemsToUpdate = await models.Orde_Item.findAll({
+            //     where: {
+            //         "uuid": prodToUpdate.uuid
+            //     }
+            // })
+            // cartItemsToUpdate.map(async ci => {
+            //     ci.prouct_name = prodToUpdate.product_name;
+            //     ci.image_url = prodToUpdate.image_url;
+            //     await ci.save()
+            // })
             return res.status(200).send()
         })
 
@@ -69,13 +68,13 @@ const deleteProduct = async (req, res) => {
                     'uuid': req.query.product
                 }
             });
-            //if product is deleted, delete all corresponding cart items.
-            //Later on notify user of deletion so they are not confused when they see their cart.
-            models.Cart_Item.destroy({ 
-                where: {
-                    'product_uuid': req.query.product
-                }
-            })
+            // //if product is deleted, delete all corresponding cart items.
+            // //Later on notify user of deletion so they are not confused when they see their cart.
+            // models.Cart_Item.destroy({ 
+            //     where: {
+            //         'product_uuid': req.query.product
+            //     }
+            // })
             res.status(200).send()
         })
 

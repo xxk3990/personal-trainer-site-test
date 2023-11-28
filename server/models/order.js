@@ -9,6 +9,7 @@ const orderModel = (sequelize, DataTypes) => {
         },
         order_date: DataTypes.DATEONLY,
         order_total: DataTypes.INTEGER,
+        completed: DataTypes.BOOLEAN,
         },
         {
             sequelize,

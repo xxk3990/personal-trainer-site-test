@@ -7,11 +7,11 @@ const utils = require('./controller-utils')
 const userOrders = async (req, res) => {
     const orders = await models.Order.findAll({
         where: {
-            'completed': true
+            'completed': true //later also where user_uuid = current logged in user_uuid
         },
         include: {
             model: models.Order_Item,
-            attributes: ['product_uuid', 'quantity', 'item_price'],
+            attributes: ['product_uuid', 'quantity'],
             as: "items_in_order",
             //include: []
         }
@@ -39,7 +39,6 @@ const createOrder = async (req, res) => {
                 order_uuid: newOrder.uuid,
                 product_uuid: item.product_uuid,
                 quantity: item.quantity,
-                item_price: item.price,
             })
             await models.Order.create(newOrder);
             return res.status(200).json({

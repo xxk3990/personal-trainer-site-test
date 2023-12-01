@@ -5,6 +5,11 @@ const models = require('../models')
 const utils = require('./controller-utils')
 
 const getOrderItems = async (req, res) => {
+    const order = await models.Order.findOne({
+        where: {
+            'uuid': req.query.orderID
+        }
+    })
     const orderItems = await models.Order_Item.findAll({
         where: {
             'order_uuid': req.query.orderID
@@ -12,7 +17,6 @@ const getOrderItems = async (req, res) => {
         raw: true
     })
     if (orderItems.length !== 0) {
-        const allPrices = orderItems.map(x => x.item_price)
         const cart = [...orderItems]; //create a local copy of the DB array before adding stuff
         for (let i = 0; i < cart.length; i++) {
             const matchingProduct = await models.Product.findOne({
@@ -22,13 +26,18 @@ const getOrderItems = async (req, res) => {
             })
             //add product fields to array sent to FE
             cart[i].product_name = matchingProduct.product_name,
-                cart[i].image_url = matchingProduct.image_url
+            cart[i].image_url = matchingProduct.image_url
+            cart[i].item_total = matchingProduct.price * cart[i].quantity;
         }
+        const total = cart.map(x => x.item_total).reduce((acc, val) => {
+            return acc + val;
+        })
+    //set order total in DB to the sum of the item prices to make sure it stays the same # as the items sum
+        order.order_total = total;
+        await order.save();
         return res.json({
             cart_items: cart,
-            cart_total: allPrices.reduce((acc, val) => {
-                return acc + val
-            })
+            cart_total: total
         })
     } else {
         return res.send([])
@@ -47,7 +56,6 @@ const createOrderItem = async (req, res) => {
         order_uuid: req.body.order_uuid,
         quantity: req.body.quantity,
         product_uuid: req.body.product_uuid,
-        item_price: matchingProduct.price
     }
     const matchingOrder = await models.Order.findOne({
         where: {
@@ -90,10 +98,9 @@ const updateOrderItem = async (req, res, next) => {
                     'uuid': itemToUpdate.order_uuid
                 }
             })
-            //if incoming quantity is higher than current, increase in DB
+            //if incoming quantity is higher than current, increase order_total in DB
             if (req.body.quantity > itemToUpdate.quantity) {
                 itemToUpdate.quantity = req.body.quantity;
-                itemToUpdate.item_price = itemToUpdate.item_price + matchingProduct.price;
                 console.log(itemToUpdate)
                 //update corresponding order total
                 matchingOrder.order_total = matchingOrder.order_total + matchingProduct.price;
@@ -102,7 +109,6 @@ const updateOrderItem = async (req, res, next) => {
                 return res.status(200).send()
             } else { //if not, decrease.
                 itemToUpdate.quantity = req.body.quantity;
-                itemToUpdate.item_price = itemToUpdate.item_price - matchingProduct.price;
                 matchingOrder.order_total = matchingOrder.order_total - matchingProduct.price;
                 await itemToUpdate.save();
                 await matchingOrder.save();
@@ -119,13 +125,46 @@ const updateOrderItem = async (req, res, next) => {
 }
 
 const deleteOrderItem = async (req, res) => {
+    const matchingOrder = await models.Order.findOne({
+        where: {
+            'uuid': req.query.order
+        }
+    })
+    const allItemsInOrder = await models.Order_Item.findAll({
+        where: {
+            'order_uuid': req.query.order
+        }
+    })
+    const matchingProduct = await models.Product.findOne({
+        where: {
+            'uuid': req.query.product
+        }
+    })
     try {
-        models.Order_Item.destroy({
-            where: {
-                'uuid': req.query.item
+        models.sequelize.transaction(async () => {
+            
+            await models.Order_Item.destroy({
+                where: {
+                    'uuid': req.query.item
+                }
+            });
+            //if length of order_items is 1 after deletion, remove order too
+            if (allItemsInOrder.length === 1) {
+                await models.Order.destroy({
+                    where: {
+                        'uuid': req.query.order
+                    }
+                })
+                return res.status(200).send()
+            } else {
+                //if not, delete and only decrease order total.
+                //subtract from order total if order_item is deleted
+                matchingOrder.order_total -= (matchingProduct.price * req.query.quantity);
+                await matchingOrder.save();
+                return res.status(200).send()
             }
-        });
-        res.status(200).send()
+            
+        })
     } catch {
         return res.status(400).send()
     }

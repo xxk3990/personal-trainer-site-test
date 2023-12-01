@@ -36,36 +36,11 @@ const updateProduct = async (req, res) => {
         }
     })
     try {
-        models.sequelize.transaction(async () => {
-            prodToUpdate.price = utils.removeDecimalOrAddZeros(prod.price);
-            prodToUpdate.product_name = prod.product_name;
-            prodToUpdate.image_url = prod.image_url;
-            await prodToUpdate.save();
-            //update all corresponding active order items if product is updated
-            const activeOrders = await models.Order.findAll({
-                where: {
-                    'completed': false
-                },
-                raw: true
-            })
-            if (activeOrders.length !== 0) {
-                activeOrders.map(async odr => {
-                    //Update all order items that contain the product being updated's uuid.
-                    const items = await models.Order_Item.findAll({
-                        where: {
-                            'order_uuid': odr.uuid,
-                            'product_uuid': prodToUpdate.uuid
-                        }
-                    })
-                    items.forEach(async itm => {
-                        itm.item_price = prodToUpdate.price * itm.quantity
-                        await itm.save();
-                    })
-                })
-            }
-            return res.status(200).send()
-        })
-
+        prodToUpdate.price = utils.removeDecimalOrAddZeros(prod.price);
+        prodToUpdate.product_name = prod.product_name;
+        prodToUpdate.image_url = prod.image_url;
+        await prodToUpdate.save();
+        return res.status(200).send()
     } catch {
         return res.status(304).send()
     }
@@ -79,7 +54,7 @@ const deleteProduct = async (req, res) => {
                     'uuid': req.query.product
                 }
             });
-            // //if product is deleted, delete all corresponding cart items.
+            // //if product is deleted, delete all corresponding order items and decrease all order_totals.
             // //Later on maybe notify user of deletion so they are not confused when they see their cart.
             const activeOrders = await models.Order.findAll({
                 where: {

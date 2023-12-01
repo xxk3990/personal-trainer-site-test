@@ -159,7 +159,7 @@ export default function ShoppingCart() {
     const submitCartDelete = async(itemToDelete) => {
         console.log(itemToDelete)
         setSnackbarMessage("");
-        const endpoint = `order-items?item=${itemToDelete.uuid}`;
+        const endpoint = `order-items?item=${itemToDelete.uuid}&order=${itemToDelete.order_uuid}&product=${itemToDelete.product_uuid}&quantity=${itemToDelete.quantity}`;
         const response = await handleDelete(endpoint)
         setOpenSnackbar(true);
         setSnackbarMessage("Removing item...");
@@ -307,7 +307,7 @@ const CartItem = (props) => {
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{addDecimal(ci.item_price)}</span>
+            <span>{addDecimal(ci.item_total)}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease}> – </button>

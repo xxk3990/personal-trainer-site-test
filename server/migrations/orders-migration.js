@@ -14,6 +14,7 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
       order_total: Sequelize.INTEGER,
+      completed: Sequelize.BOOLEAN,
       created_at: {
         allowNull: false,
         type: Sequelize.DATE

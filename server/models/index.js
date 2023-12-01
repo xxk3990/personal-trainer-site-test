@@ -18,9 +18,6 @@ const {
 const {
   orderItemModel
 } = require("./order-item");
-const {
-  cartItemModel
-} = require("./cart-item");
 const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
 
 const connectionOptions = {
@@ -57,9 +54,6 @@ if(environment === 'development') {
 
   }
 }
-
-
-
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   host: connectionOptions.host,
   port: connectionOptions.port,
@@ -70,14 +64,11 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   dialectOptions: connectionOptions.dialectOptions
 })
 
-console.log('sequelize:', sequelize)
-
 
 const models = {
   Product: productModel(sequelize, Sequelize.DataTypes),
   Order: orderModel(sequelize, Sequelize.DataTypes),
   Order_Item: orderItemModel(sequelize, Sequelize.DataTypes),
-  Cart_Item: cartItemModel(sequelize, Sequelize.DataTypes)
 }
 
 fs

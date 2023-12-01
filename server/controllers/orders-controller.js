@@ -6,9 +6,12 @@ const utils = require('./controller-utils')
 
 const userOrders = async (req, res) => {
     const orders = await models.Order.findAll({
+        where: {
+            'completed': true
+        },
         include: {
             model: models.Order_Item,
-            attributes: ['product_uuid', 'quantity'],
+            attributes: ['product_uuid', 'quantity', 'item_price'],
             as: "items_in_order",
             //include: []
         }
@@ -36,10 +39,10 @@ const createOrder = async (req, res) => {
                 order_uuid: newOrder.uuid,
                 product_uuid: item.product_uuid,
                 quantity: item.quantity,
-                price: item.price,
+                item_price: item.price,
             })
             await models.Order.create(newOrder);
-            return res.status(200).send({
+            return res.status(200).json({
                 order_uuid: newOrder.uuid
             })
         })
@@ -48,17 +51,16 @@ const createOrder = async (req, res) => {
     }
 }
 
-const submitOrder = async (req, res) => { //add transactional integrity
+const submitOrder = async (req, res) => {
     const orderToSubmit = await models.Order.findOne({
         where: {
-            'uuid': req.body.orderID
+            'uuid': req.body.order_uuid
         }
     })
-    console.log("total:", total)
     if (orderToSubmit.length === 0 || !orderToSubmit) { //if there is an issue with the items in their order
         return res.status(400).send()
     } else {
-        const orderDate = new Date(req.body.order_date).toISOString();
+        const orderDate = new Date(req.body.order_date).toISOString(); //update order date to date completed
         orderToSubmit.order_date = orderDate;
         orderToSubmit.completed = true;
         await orderToSubmit.save();

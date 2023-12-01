@@ -18,32 +18,39 @@ export default function ShoppingCart() {
         await handleGet(endpoint, setProducts)
     }
 
-    const getCartItems = async (orderID) => {
-        //Couldn't use default request service handleGet method as I also had to calc the order total on load
-        const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
-        const url = `${host}/order-items?orderID=${orderID}`
-        await fetch(url, {
-            method: 'GET',
-        }).then(response => response.json(),
-        []).then(responseData => {
-            if(!responseData.cart_items) {
-                setCartTotal(0)
-                setCartItems([]); 
-            } else {
-                setCartTotal(responseData.cart_total)
-                console.log("cartItems from DB: ", responseData.cart_items)
-                //sort response data by created at (newer items at the end) so order can't change
-                const sortedCart = responseData.cart_items.sort((x, y) => new Date(x.createdAt) - new Date(y.createdAt))
-                setCartItems(sortedCart) //set it equal to data from API
-            }
-            
-        })
+    const getCartItems = async () => {
+        const orderID = localStorage.getItem("orderID") 
+        if(orderID === null || orderID === "") {
+            return;
+        } else {
+            //Couldn't use default request service handleGet method as I also had to calc the order total on load
+            const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
+            const url = `${host}/order-items?orderID=${orderID}`
+            await fetch(url, {
+                method: 'GET',
+            }).then(response => response.json(),
+            []).then(responseData => {
+                if(!responseData.cart_items) {
+                    setCartTotal(0)
+                    setCartItems([]); 
+                } else {
+                    setCartTotal(responseData.cart_total)
+                    console.log("cartItems from DB: ", responseData.cart_items)
+                    //sort response data by created at (newer items at the end) so order can't change
+                    const sortedCart = responseData.cart_items.sort((x, y) => new Date(x.createdAt) - new Date(y.createdAt))
+                    setCartItems(sortedCart) //set it equal to data from API
+                }
+                
+            })
+        }
+       
     }
 
 
     useEffect(() => {
         document.title = "Shopping Cart"
         getProducts()
+        getCartItems()
     }, []);
 
 
@@ -63,8 +70,8 @@ export default function ShoppingCart() {
                     const data = await response.json();
                     console.log(data)
                     setCartItems([...cartItems, item])
-                    getCartItems(data.order_uuid)
                     localStorage.setItem("orderID", data.order_uuid)
+                    getCartItems()
                 }
             } catch {
                 alert("An error occurred and the item could not be added.")
@@ -86,7 +93,7 @@ export default function ShoppingCart() {
                         console.log()
                         tempCart.push({...item, quantity: item.quantity})
                         setCartItems(tempCart)
-                        getCartItems(orderID);
+                        getCartItems();
                     }
                 } catch {
                     alert("An error occurred and the item could not be added.")
@@ -108,10 +115,12 @@ export default function ShoppingCart() {
     const decreaseCartItem = (itemReduced) => {
         const tempCart = [...cartItems];
         if(itemReduced.quantity === 1 && itemReduced.quantity !== 0) { //if going from one to zero, remove completely
-            if(cartItems.length === 1) { //if it is the last item in the cart, reset everything after deleting
+            if(cartItems.length === 1) { 
+            //if it is the last item in the cart, reset everything after deleting
                 submitCartDelete(itemReduced);
                 setCartItems([])
                 setCartTotal(0);
+                localStorage.setItem("orderID", "");
             } else { //if not, only take it out of the cart
                 const filteredCart = tempCart.filter((c) => {
                     return c !== itemReduced;
@@ -128,7 +137,6 @@ export default function ShoppingCart() {
             }
             setCartItems(tempCart)
             submitCartUpdate(tempCart[reducedItemIndex]); //submit update to DB
-            localStorage.removeItem("orderID");
         }
         
     }
@@ -137,16 +145,19 @@ export default function ShoppingCart() {
         const endpoint = `order-items`
         console.log(item)
         const requestBody = {
-            item: item,
-            cart_total: cartTotal,
+            item_uuid: item.uuid,
+            order_uuid: localStorage.getItem("orderID"),
+            product_uuid: item.product_uuid,
+            quantity: item.quantity,
         }
         const response = await handlePut(endpoint, requestBody);
         if(response.status === 200 || response.status === 201) {
-            getCartItems(item.order_uuid);
+            getCartItems();
         }
     }
 
     const submitCartDelete = async(itemToDelete) => {
+        console.log(itemToDelete)
         setSnackbarMessage("");
         const endpoint = `order-items?item=${itemToDelete.uuid}`;
         const response = await handleDelete(endpoint)
@@ -164,7 +175,6 @@ export default function ShoppingCart() {
             setTimeout(() => {
                 setOpenSnackbar(false);
                 setSnackbarMessage("");
-                getCartItems(itemToDelete.order_uuid);
             }, 750)
         }
     }
@@ -173,9 +183,8 @@ export default function ShoppingCart() {
         const endpoint = `orders`;
         const today = new Date();
         const requestBody = {
-            cart_items: cartItems,
             order_date: `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`,
-            order_total: cartTotal,
+            order_uuid: localStorage.getItem("orderID")
         }
         try {
             const response = await handlePut(endpoint, requestBody);
@@ -188,7 +197,7 @@ export default function ShoppingCart() {
                     setCartItems([]);
                     setCartTotal(0);
                     setSnackbarMessage("");
-                    localStorage.removeItem("orderID");
+                    localStorage.setItem("orderID", "");
                 }, 1500)
             } else {
                 setOpenSnackbar(true);
@@ -298,7 +307,7 @@ const CartItem = (props) => {
             <span>{ci.quantity}</span>
             <span>{ci.product_name}</span>
             <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{addDecimal(ci.price)}</span>
+            <span>{addDecimal(ci.item_price)}</span>
             <footer className='cart-item-footer'>
                 <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
                 <button type="button" className='item-btn' onClick={handleDecrease}> – </button>

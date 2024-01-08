@@ -7,7 +7,8 @@ const utils = require('./controller-utils')
 const getOrderItems = async (req, res) => {
     const order = await models.Order.findOne({
         where: {
-            'uuid': req.query.orderID
+            'uuid': req.query.orderID,
+            "user_uuid": req.query.userID
         }
     })
     const orderItems = await models.Order_Item.findAll({

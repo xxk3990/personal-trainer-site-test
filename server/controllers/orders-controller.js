@@ -8,7 +8,7 @@ const userOrders = async (req, res) => {
     const orders = await models.Order.findAll({
         where: {
             'completed': true,
-            'user_uuid': req.query.user
+            'user_uuid': req.query.userID
         },
         include: {
             model: models.Order_Item,

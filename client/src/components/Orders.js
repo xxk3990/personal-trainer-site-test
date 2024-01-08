@@ -4,11 +4,17 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { handleGet } from '../services/requests-service';
 import '../styles/orders.css';
+import { checkAuth } from '../services/auth-service';
 import { addDecimal } from '../util-methods';
-
 export default function Orders() {
     const [orders, setOrders] = useState([]);
-    const getOrders = () => {
+    const navigate = useNavigate();
+    const getOrders = async() => {
+        const authorized = await checkAuth()
+        if(authorized === false) {
+            localStorage.clear();
+            navigate("/login")
+        }
         const endpoint = `orders?user=${localStorage.getItem("user_uuid")}`
         handleGet(endpoint, setOrders)
     }

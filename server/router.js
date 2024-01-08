@@ -13,7 +13,7 @@ const router = (app) => {
     app.put('/products', mid.verifyRequestAuth, product.updateProduct)
     app.delete('/products', mid.verifyRequestAuth, product.deleteProduct)
     app.get('/orders', mid.verifyRequestAuth, order.userOrders) //this one is for specific users, need another for admin purposes
-    //app.get('/allOrders', admin.getAllOrders) not created yet
+    //app.get('/allOrders', admin.getAllOrders) not created yet, will do when admin stuff is implemented
     app.post('/orders', mid.verifyRequestAuth, order.createOrder)
     app.put('/orders', mid.verifyRequestAuth, order.submitOrder)
     app.get('/order-items', mid.verifyRequestAuth, items.getOrderItems)

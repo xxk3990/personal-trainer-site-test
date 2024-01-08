@@ -33,3 +33,12 @@ a:focus {
 .nav-links li:hover {
     transform: scale(1.1, 1.1);
 }
+
+.logout-btn {
+    background: none;
+    color: white;
+    font-size: 18px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}

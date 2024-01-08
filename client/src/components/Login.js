@@ -30,7 +30,7 @@ export default function Login() {
     setTimeout(() => {
       setOpenSnackbar(false);
       if(page === null) {
-        navigate('/')
+        navigate('/shoppingCart')
       } else {
         navigate(`/${page}`);
       }

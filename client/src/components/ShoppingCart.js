@@ -5,6 +5,7 @@ import { addDecimal } from '../util-methods';
 import { Snackbar } from '@mui/material';
 import {v4 as uuidv4} from 'uuid'
 import '../styles/shopping-cart.css';
+import {useNavigate} from "react-router-dom"
 
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
@@ -12,14 +13,18 @@ export default function ShoppingCart() {
     const [cartTotal, setCartTotal] = useState(0)
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    
+    const navigate = useNavigate();
     const getProducts = async () => {
         const endpoint = `products`
         await handleGet(endpoint, setProducts)
     }
 
     const getCartItems = async () => {
-        const orderID = localStorage.getItem("orderID") 
+        const orderID = localStorage.getItem("orderID")
+        const userID = localStorage.getItem("user_uuid") 
+        if(userID === null) {
+            navigate("/login")
+        }
         if(orderID === null || orderID === "") {
             return;
         } else {
@@ -60,6 +65,7 @@ export default function ShoppingCart() {
             const today = new Date()
             const endpoint = `orders`
             const requestBody = {
+                user_uuid: localStorage.getItem("user_uuid"),
                 item: item,
                 order_date: `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`,
                 order_total: item.price

@@ -1,10 +1,11 @@
 const product = require('./controllers/products-controller');
 const order = require("./controllers/orders-controller")
 const items = require("./controllers/orderItems-controller")
+const users = require("./controllers/users-controller")
 
 const router = (app) => {
-   // app.post('/login', users.login)
- //   app.post('/addUser', users.createAccount)
+    app.post('/login', users.login)
+    app.post('/addUser', users.createAccount)
    // app.get('/verify', mid.verifyRequestAuth, mid.verifySession)
     app.get('/products', product.getProducts)
     app.post('/products', product.addProduct) //admin only

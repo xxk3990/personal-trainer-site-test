@@ -9,7 +9,7 @@ import { addDecimal } from '../util-methods';
 export default function Orders() {
     const [orders, setOrders] = useState([]);
     const getOrders = () => {
-        const endpoint = `orders`
+        const endpoint = `orders?user=${localStorage.getItem("user_uuid")}`
         handleGet(endpoint, setOrders)
     }
     useEffect(() => {

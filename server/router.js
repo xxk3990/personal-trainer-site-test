@@ -7,6 +7,7 @@ const mid = require("./middleware/verify-auth.js")
 const router = (app) => {
     app.post('/login', users.login)
     app.post('/addUser', users.createAccount)
+    app.post('/logout', mid.verifyRequestAuth, users.logout)
     app.get('/verify', mid.verifyRequestAuth, mid.verifySession)
     app.get('/products', product.getProducts)
     app.post('/products', mid.verifyRequestAuth, product.addProduct) //admin only

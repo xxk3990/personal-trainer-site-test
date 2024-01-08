@@ -7,6 +7,7 @@ const orderModel = (sequelize, DataTypes) => {
             allowNull: false,
             autoIncrementIdentity: true
         },
+        user_uuid: DataTypes.UUID,
         order_date: DataTypes.DATEONLY,
         order_total: DataTypes.INTEGER,
         completed: DataTypes.BOOLEAN,

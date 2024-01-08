@@ -7,7 +7,8 @@ const utils = require('./controller-utils')
 const userOrders = async (req, res) => {
     const orders = await models.Order.findAll({
         where: {
-            'completed': true //later also where user_uuid = current logged in user_uuid
+            'completed': true,
+            'user_uuid': req.query.userID
         },
         include: {
             model: models.Order_Item,
@@ -15,7 +16,7 @@ const userOrders = async (req, res) => {
             as: "items_in_order",
             //include: []
         }
-    }); //add check for orders based on specific user once users are added
+    });
     if (orders.length !== 0) {
         return res.json(orders)
     } else {
@@ -27,6 +28,7 @@ const createOrder = async (req, res) => {
     const orderDate = new Date(req.body.order_date).toISOString();
     const newOrder = {
         uuid: uuidv4(),
+        user_uuid: req.body.user_uuid,
         order_date: orderDate,
         order_total: req.body.order_total,
         completed: false,

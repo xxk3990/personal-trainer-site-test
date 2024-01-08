@@ -9,6 +9,9 @@ module.exports = {
         allowNull: false,
         autoIncrementIdentity: true
       },
+      user_uuid: {
+        type: Sequelize.UUID
+      },
       order_date: {
         type: Sequelize.DATEONLY,
         defaultValue: Sequelize.NOW,

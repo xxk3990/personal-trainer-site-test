@@ -18,6 +18,9 @@ const {
 const {
   orderItemModel
 } = require("./order-item");
+const {
+  userModel
+} = require("./user")
 const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
 
 const connectionOptions = {
@@ -69,6 +72,7 @@ const models = {
   Product: productModel(sequelize, Sequelize.DataTypes),
   Order: orderModel(sequelize, Sequelize.DataTypes),
   Order_Item: orderItemModel(sequelize, Sequelize.DataTypes),
+  User: userModel(sequelize, Sequelize.DataTypes),
 }
 
 fs
@@ -90,6 +94,11 @@ fs
 models.Order.hasMany(models.Order_Item, {
   as: "items_in_order",
   foreignKey: "order_uuid"
+})
+
+models.Order.belongsTo(models.User, {
+  as: "order_user",
+  foreignKey: "user_uuid"
 })
 
 

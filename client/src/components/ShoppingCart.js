@@ -7,7 +7,6 @@ import {v4 as uuidv4} from 'uuid'
 import '../styles/shopping-cart.css';
 import {useNavigate} from "react-router-dom"
 import { checkAuth } from '../services/auth-service';
-
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
     const [cartItems, setCartItems] = useState([]);
@@ -15,6 +14,7 @@ export default function ShoppingCart() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const navigate = useNavigate();
+
     const getProducts = async () => {
         const endpoint = `products`
         await handleGet(endpoint, setProducts)

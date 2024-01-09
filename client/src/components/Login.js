@@ -52,6 +52,7 @@ export default function Login() {
         localStorage.setItem("userRole", data.user_role)
         localStorage.setItem("expiration", (data.token_expires_in / 60000))
         localStorage.setItem("loginTime", Date.now())
+        localStorage.setItem("seconds", 60);
         setOpenSnackbar(true)
         navigateToRequestedPage()
       } else if(response.status === 401) {

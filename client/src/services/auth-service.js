@@ -60,3 +60,12 @@ export const checkAuth = async () => {
         return false;
     }
 }
+
+export const minsTillLogout = (now) => { 
+    const loginTime = localStorage.getItem("loginTime")
+    const expiration = localStorage.getItem("expiration")
+    const msecsSince = now - loginTime; //get milliseconds since user logged in
+    const minsSince = msecsSince / 60000; //convert it to minutes
+    const minsLeft = expiration - minsSince; //subtract # of minutes logged in from token exp time
+    return Math.floor(minsLeft); //round off decimals
+}

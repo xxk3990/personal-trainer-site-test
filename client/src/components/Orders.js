@@ -22,6 +22,7 @@ export default function Orders() {
         document.title = "Your Orders"
         getOrders()
     },[])
+    
     if(orders.length === 0) {
         return (
             <div className='Orders'>No Orders yet.</div>

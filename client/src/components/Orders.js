@@ -15,7 +15,7 @@ export default function Orders() {
             localStorage.clear();
             navigate("/login")
         }
-        const endpoint = `orders?user=${localStorage.getItem("user_uuid")}`
+        const endpoint = `orders?userID=${localStorage.getItem("user_uuid")}`
         handleGet(endpoint, setOrders)
     }
     useEffect(() => {
@@ -32,7 +32,7 @@ export default function Orders() {
             <div className='Orders'>
                 <section className='orders-grid'>
                     {orders.map(odr => {
-                        return <OrderTile key={odr.uuid} odr={odr} />
+                        return <OrderTile odr={odr} />
                     })}
                 </section>
             </div>
@@ -41,11 +41,46 @@ export default function Orders() {
 
 }
 const OrderTile = (props) => {
+    //TODO: GET ALL PRODUCTS OF ORDER TO APPEAR. RIGHT NOW IT IS JUST THE FIRST ONE.
     const odr = props.odr;
+    let quantity;
+    const [showOrderDetails, setShowOrderDetails] = useState(false);
+    const [details, setDetails] = useState([])
+    const getProductsInOrder = () => {
+        odr.items_in_order.map(async od => {
+            const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
+            const endpoint = `productDetails?product=${od.product_uuid}`
+            await fetch(`${host}/${endpoint}`, {
+                method: 'GET',
+                credentials: "include"
+            }, []).then(res => res.json()).then(data => {
+                setDetails(data) //doing this for some reason makes details undefined
+            })
+            quantity = od.quantity;
+            console.log("details:", details)
+        })
+    }
+    const orderClick = () => {
+        setShowOrderDetails(!showOrderDetails)
+        getProductsInOrder()
+    }
     return (
         <section className='order-info'>
             <h3>Date: {odr.order_date}</h3>
             <p>Amount: ${addDecimal(odr.order_total)}</p>
+            <button className='view-details-btn' onClick={orderClick}>View Details</button>
+            {showOrderDetails ? details.map(det => <OrderProduct det={det} quantity={quantity}/>): null}
+        </section>
+        
+    )
+}
+
+const OrderProduct = (props) => {
+    const det = props.det;
+    return (
+        <section className='order-details'>
+            <h4>Name: {det.product_name} </h4>
+            {/* <p>Price: {det.price * quantity}</p> */}
         </section>
     )
 }

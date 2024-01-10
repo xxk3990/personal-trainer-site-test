@@ -14,7 +14,6 @@ const userOrders = async (req, res) => {
             model: models.Order_Item,
             attributes: ['product_uuid', 'quantity'],
             as: "items_in_order",
-            //include: []
         }
     });
     if (orders.length !== 0) {

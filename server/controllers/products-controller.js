@@ -81,11 +81,17 @@ const deleteProduct = async (req, res) => {
 
 }
 
+const getProductForOrder = async(req, res) => {
+    const prod = await models.Product.findOne({ where: {"uuid" : req.query.product}, raw: true})
+    return res.status(200).json(prod);
+}
+
 
 
 module.exports = {
     getProducts,
     addProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getProductForOrder
 }

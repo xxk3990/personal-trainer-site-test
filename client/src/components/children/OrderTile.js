@@ -27,7 +27,8 @@ export const OrderTile = (props) => {
                 <ul className='order-products-list'> 
                     {details.map(det => {
                         return (
-                            <li className='order-detail' key={uuidv4()}><h4>{det.product_name}</h4>
+                            <li className='order-detail' key={uuidv4()}>
+                                <h4>{det.product_name}</h4>
                                 <span>
                                     <p>QTY: {det.quantity}</p>
                                     <p>Price: ${addDecimal(det.price * det.quantity)}</p>

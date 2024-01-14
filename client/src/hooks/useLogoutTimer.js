@@ -11,7 +11,7 @@ export const useLogoutTimer = (minutes, setMinutes, seconds, setSeconds) => {
             return 0;
         }
     }, 60000)
-    if (minutes === 1) {
+    if (minutes <= 1) {
         const interval = setInterval(() => {
             seconds--;
             setSeconds(seconds);

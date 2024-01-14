@@ -14,7 +14,6 @@ const userOrders = async (req, res) => {
             model: models.Order_Item,
             attributes: ['product_uuid', 'quantity'],
             as: "items_in_order",
-            //include: []
         }
     });
     if (orders.length !== 0) {
@@ -22,6 +21,20 @@ const userOrders = async (req, res) => {
     } else {
         return res.send([]) //send empty response so front-end can check if orders.length === 0
     }
+}
+
+const getOrderedProducts = async(req, res) => {
+    const order = req.query.orderID;
+    const itemsOrdered = await models.Order_Item.findAll({where: {"order_uuid": order}})
+    const items = [...itemsOrdered];
+    for(let i = 0; i < items.length; i++) {
+        const prod = await models.Product.findOne({ where: {"uuid" : items[i].product_uuid}, raw: true})
+        items[i] = {
+            ...prod,
+            quantity: items[i].quantity
+        }
+    }
+    return res.status(200).json(items);
 }
 
 const createOrder = async (req, res) => {
@@ -72,5 +85,6 @@ const submitOrder = async (req, res) => {
 module.exports = {
     userOrders,
     createOrder,
-    submitOrder
+    submitOrder,
+    getOrderedProducts
 }

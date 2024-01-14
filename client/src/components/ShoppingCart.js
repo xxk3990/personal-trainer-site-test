@@ -7,6 +7,8 @@ import {v4 as uuidv4} from 'uuid'
 import '../styles/shopping-cart.css';
 import {useNavigate} from "react-router-dom"
 import { checkAuth } from '../services/auth-service';
+import { CartItem } from './children/CartItem';
+import { CatalogItem } from './children/CatalogItem';
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
     const [cartItems, setCartItems] = useState([]);
@@ -243,7 +245,7 @@ export default function ShoppingCart() {
                         return (
                             <section key={p.uuid} className='product-details'>
                             {/* give props and add to cart method to specific product */}
-                                <Product p={p} addCartItem={addCartItem}/> 
+                                <CatalogItem p={p} addCartItem={addCartItem}/> 
                             </section>
                         )
                     })}
@@ -259,7 +261,7 @@ export default function ShoppingCart() {
                         {products.map(p => {
                             return (
                                 <section key={p.uuid} className='product-details'>
-                                    <Product p={p} addCartItem={addCartItem}/>
+                                    <CatalogItem p={p} addCartItem={addCartItem}/>
                                 </section>
                             )
                         })}
@@ -280,55 +282,5 @@ export default function ShoppingCart() {
 
 }
 
-const Product = (props) => {
-    const p = props.p;
-    const addCartItem = props.addCartItem;
-    const item = {
-        product_name: p.product_name,
-        product_uuid: p.uuid,
-        price: p.price,
-        image_url: p.image_url,
-        quantity: 1
-    }
-    const handleClick = () => {
-        //call parent "add to cart" method with child's unique product info
-        addCartItem(item);
-    }
-    return (
-        <section key={p.uuid} className="product-info">
-          <h3 id="productname">{p.product_name}</h3>
-          <p>${addDecimal(p.price)}</p>
-          <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
-          <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
-        </section>
-    )
-}
 
-const CartItem = (props) => {
-    const ci = props.ci; //ci for Cart Item
-    const decreaseCartItem = props.decreaseCartItem;
-    const addCartItem = props.addCartItem;
-    const submitCartDelete = props.submitCartDelete;
-    const handleDecrease = () => {
-        decreaseCartItem(ci);
-    }
-    const handleIncrease = () => {
-        addCartItem(ci);
-    }
-    const handleDelete = () => {
-        submitCartDelete(ci);
-    }
-    return (
-        <section key={ci.uuid} className='cart-item-li'>
-            <span>{ci.quantity}</span>
-            <span>{ci.product_name}</span>
-            <img className="img-in-cart" src = {ci.image_url} alt={ci.product_name}/>
-            <span>{addDecimal(ci.item_total)}</span>
-            <footer className='cart-item-footer'>
-                <button type="button" className='item-btn' onClick={handleIncrease}> + </button>
-                <button type="button" className='item-btn' onClick={handleDecrease}> – </button>
-                <button type="button" className='item-btn' onClick={handleDelete}> Delete </button>
-            </footer>
-        </section>
-    )
-}
+

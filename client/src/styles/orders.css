@@ -11,26 +11,43 @@
 
 .order-info {
     padding: 0 15px 0 15px;
-    margin: 0 10px 0 10px;
     margin-top: 10px;
-    max-height: 250px;
     width: 300px;
     border: 1px solid black;
     text-align: center;
-}
-
-.order-details {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    position: absolute;
-    z-index: 1;
-    background-color: white;
-    border: 1px solid black;
-    width: 300px;
 }
 
 .order-products-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid black;
 }
+
+
+.order-detail {
+    background-color: white;
+    border-top: 1px solid black;
+    width: 300px;
+}
+
+.order-detail span {
+    display: flex;
+    justify-content: space-around;
+}
+
+.order-detail span p {
+    margin: 5px;
+}
+
+.order-detail h4 {
+    margin: 5px 0 5px 0;
+}
+
+
+

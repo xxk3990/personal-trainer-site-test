@@ -23,6 +23,20 @@ const userOrders = async (req, res) => {
     }
 }
 
+const getOrderedProducts = async(req, res) => {
+    const order = req.query.orderID;
+    const itemsOrdered = await models.Order_Item.findAll({where: {"order_uuid": order}})
+    const items = [...itemsOrdered];
+    for(let i = 0; i < items.length; i++) {
+        const prod = await models.Product.findOne({ where: {"uuid" : items[i].product_uuid}, raw: true})
+        items[i] = {
+            ...prod,
+            quantity: items[i].quantity
+        }
+    }
+    return res.status(200).json(items);
+}
+
 const createOrder = async (req, res) => {
     const orderDate = new Date(req.body.order_date).toISOString();
     const newOrder = {
@@ -71,5 +85,6 @@ const submitOrder = async (req, res) => {
 module.exports = {
     userOrders,
     createOrder,
-    submitOrder
+    submitOrder,
+    getOrderedProducts
 }

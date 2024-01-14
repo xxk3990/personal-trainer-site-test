@@ -6,7 +6,7 @@
 .orders-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    width: 50vw;
+    width: 60vw;
 }
 
 .order-info {

@@ -3,6 +3,7 @@ const order = require("./controllers/orders-controller")
 const items = require("./controllers/orderItems-controller")
 const users = require("./controllers/users-controller")
 const mid = require("./middleware/verify-auth.js")
+const stripe = require("./controllers/stripe-controller.js")
 
 const router = (app) => {
     app.post('/login', users.login)
@@ -22,7 +23,7 @@ const router = (app) => {
     app.post("/order-items", mid.verifyRequestAuth, items.createOrderItem);
     app.put('/order-items', mid.verifyRequestAuth, items.updateOrderItem);
     app.delete("/order-items", mid.verifyRequestAuth, items.deleteOrderItem)
-
+    app.post("/payment", mid.verifyRequestAuth, stripe.payWithStripe)
 
 }
 

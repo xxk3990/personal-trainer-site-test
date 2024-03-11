@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import { checkAuth } from '../services/auth-service';
 import { CartItem } from './children/CartItem';
 import { CatalogItem } from './children/CatalogItem';
+import { StripeComponent } from './children/StripeComponent';
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
     const [cartItems, setCartItems] = useState([]);
@@ -16,6 +17,7 @@ export default function ShoppingCart() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const navigate = useNavigate();
+    const [showCheckout, setShowCheckout] = useState(false);
 
     const getProducts = async () => {
         const endpoint = `products`
@@ -55,6 +57,10 @@ export default function ShoppingCart() {
             }
         }   
        
+    }
+
+    const viewCheckout = () => {
+        setShowCheckout(!showCheckout);
     }
 
 
@@ -197,6 +203,8 @@ export default function ShoppingCart() {
         }
     }
 
+
+    //TODO: HANDLE ORDER UPDATE TO DB AFTER STRIPE PAYMENT SUCCESS
     const submitOrder = async() => {
         const endpoint = `orders`;
         const today = new Date();
@@ -209,7 +217,7 @@ export default function ShoppingCart() {
             if(response.status === 200 || response.status === 201) {
                 setSnackbarMessage("") //clear current msg
                 setOpenSnackbar(true);
-                setSnackbarMessage("Order Submitted!"); //set it to order successful
+                setSnackbarMessage("Loading Payment Screen..."); //set it to order successful
                 setTimeout(() => {
                     setOpenSnackbar(false);
                     setCartItems([]);
@@ -273,9 +281,14 @@ export default function ShoppingCart() {
                                 return <li key={uuidv4()}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem} submitCartDelete={submitCartDelete}/></li>
                             })}
                         </ul>
-                        <footer className='cart-footer'>Total: ${addDecimal(cartTotal)} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        <footer className='cart-footer'>
+                           <span><p>Total: ${addDecimal(cartTotal)}</p> <button className='submit-order-btn' onClick={viewCheckout}>Checkout</button></span>
+                            {showCheckout ? <StripeComponent cartItems={cartItems} cartTotal = {cartTotal} submitOrder={submitOrder}/> : null}
+                        </footer>
                     </section>
+                    
                 </div>
+
             )
         }
     }

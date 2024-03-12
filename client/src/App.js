@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import CreateAccount from "./components/CreateAccount"
 import { ProtectedRoute } from './guards/login-guard';
 import { AdminRoute } from './guards/admin-guard';
+import { PaymentSuccess } from './components/PaymentSuccess';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route element={<> <Navbar/> <Outlet /></>}>
         <Route path="/shoppingCart" element={<ProtectedRoute><ShoppingCart/></ProtectedRoute>}/>
         <Route path="/userOrders" element={<ProtectedRoute><Orders/></ProtectedRoute>}/>
+        <Route path="/paymentSuccess" element={<ProtectedRoute><PaymentSuccess/></ProtectedRoute>}/>
         <Route path="/adminProducts" element={<ProtectedRoute><AdminRoute><Products/></AdminRoute></ProtectedRoute>}/>
       </Route>
     </Routes>   

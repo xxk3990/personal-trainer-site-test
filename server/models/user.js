@@ -1,7 +1,7 @@
 'use strict';
 const userModel = (sequelize, DataTypes) => {
     const User = sequelize.define('User', {
-        id: {
+        uuid: {
             type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false,

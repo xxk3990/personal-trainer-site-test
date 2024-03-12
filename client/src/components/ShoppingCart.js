@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import { checkAuth } from '../services/auth-service';
 import { CartItem } from './children/CartItem';
 import { CatalogItem } from './children/CatalogItem';
+import { StripeComponent } from './children/StripeComponent';
 export default function ShoppingCart() {
     const [products, setProducts] = useState([]);
     const [cartItems, setCartItems] = useState([]);
@@ -16,6 +17,7 @@ export default function ShoppingCart() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const navigate = useNavigate();
+    const [showCheckout, setShowCheckout] = useState(false);
 
     const getProducts = async () => {
         const endpoint = `products`
@@ -32,6 +34,7 @@ export default function ShoppingCart() {
             if(orderID === null || orderID === "") {
                 return;
             } else {
+                setCartItems([]) //clear previous cart
                 //Couldn't use default request service handleGet method as I also had to calc the order total on load
                 const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
                 const url = `${host}/order-items?orderID=${orderID}&userID=${localStorage.getItem("user_uuid")}`
@@ -55,6 +58,10 @@ export default function ShoppingCart() {
             }
         }   
        
+    }
+
+    const viewCheckout = () => {
+        setShowCheckout(!showCheckout);
     }
 
 
@@ -196,39 +203,6 @@ export default function ShoppingCart() {
             }, 750)
         }
     }
-
-    const submitOrder = async() => {
-        const endpoint = `orders`;
-        const today = new Date();
-        const requestBody = {
-            order_date: `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`,
-            order_uuid: localStorage.getItem("orderID")
-        }
-        try {
-            const response = await handlePut(endpoint, requestBody);
-            if(response.status === 200 || response.status === 201) {
-                setSnackbarMessage("") //clear current msg
-                setOpenSnackbar(true);
-                setSnackbarMessage("Order Submitted!"); //set it to order successful
-                setTimeout(() => {
-                    setOpenSnackbar(false);
-                    setCartItems([]);
-                    setCartTotal(0);
-                    setSnackbarMessage("");
-                    localStorage.setItem("orderID", "");
-                }, 1500)
-            } else {
-                setOpenSnackbar(true);
-                setSnackbarMessage("Order submit failed."); //or order failed
-                setTimeout(() => {
-                    setOpenSnackbar(false);
-                    setSnackbarMessage("");
-                }, 1500)
-            }
-        } catch {
-            alert("An error occurred!")
-        }
-    }
     if(products.length === 0) {
         return (
           <div className="ShoppingCart">
@@ -273,9 +247,14 @@ export default function ShoppingCart() {
                                 return <li key={uuidv4()}><CartItem ci={ci} decreaseCartItem={decreaseCartItem} addCartItem={addCartItem} submitCartDelete={submitCartDelete}/></li>
                             })}
                         </ul>
-                        <footer className='cart-footer'>Total: ${addDecimal(cartTotal)} <button className='submit-order-btn' onClick={submitOrder}>Submit Order</button></footer>
+                        <footer className='cart-footer'>
+                           <span><p>Total: ${addDecimal(cartTotal)}</p> <button className='submit-order-btn' onClick={viewCheckout}>Checkout</button></span>
+                            {showCheckout ? <StripeComponent cartItems={cartItems}/> : null}
+                        </footer>
                     </section>
+                    
                 </div>
+
             )
         }
     }

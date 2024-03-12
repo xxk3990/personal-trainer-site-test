@@ -4,7 +4,6 @@ const process = require("process")
 const verifyRequestAuth = (req, res, next) => {
     const token = req.cookies.token;
     const secret = process.env.SECRET;
-    console.log('cookie token:',req.cookies.token);
     if(!token) {
         return res.status(401).json("Not Authenticated!")
     }

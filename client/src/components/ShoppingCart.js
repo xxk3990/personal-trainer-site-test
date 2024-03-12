@@ -34,6 +34,7 @@ export default function ShoppingCart() {
             if(orderID === null || orderID === "") {
                 return;
             } else {
+                setCartItems([]) //clear previous cart
                 //Couldn't use default request service handleGet method as I also had to calc the order total on load
                 const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
                 const url = `${host}/order-items?orderID=${orderID}&userID=${localStorage.getItem("user_uuid")}`
@@ -202,41 +203,6 @@ export default function ShoppingCart() {
             }, 750)
         }
     }
-
-
-    //TODO: HANDLE ORDER UPDATE TO DB AFTER STRIPE PAYMENT SUCCESS
-    const submitOrder = async() => {
-        const endpoint = `orders`;
-        const today = new Date();
-        const requestBody = {
-            order_date: `${today.getMonth() + 1}-${today.getDate()}-${today.getFullYear()}`,
-            order_uuid: localStorage.getItem("orderID")
-        }
-        try {
-            const response = await handlePut(endpoint, requestBody);
-            if(response.status === 200 || response.status === 201) {
-                setSnackbarMessage("") //clear current msg
-                setOpenSnackbar(true);
-                setSnackbarMessage("Loading Payment Screen..."); //set it to order successful
-                setTimeout(() => {
-                    setOpenSnackbar(false);
-                    setCartItems([]);
-                    setCartTotal(0);
-                    setSnackbarMessage("");
-                    localStorage.setItem("orderID", "");
-                }, 1500)
-            } else {
-                setOpenSnackbar(true);
-                setSnackbarMessage("Order submit failed."); //or order failed
-                setTimeout(() => {
-                    setOpenSnackbar(false);
-                    setSnackbarMessage("");
-                }, 1500)
-            }
-        } catch {
-            alert("An error occurred!")
-        }
-    }
     if(products.length === 0) {
         return (
           <div className="ShoppingCart">
@@ -283,7 +249,7 @@ export default function ShoppingCart() {
                         </ul>
                         <footer className='cart-footer'>
                            <span><p>Total: ${addDecimal(cartTotal)}</p> <button className='submit-order-btn' onClick={viewCheckout}>Checkout</button></span>
-                            {showCheckout ? <StripeComponent cartItems={cartItems} cartTotal = {cartTotal} submitOrder={submitOrder}/> : null}
+                            {showCheckout ? <StripeComponent cartItems={cartItems}/> : null}
                         </footer>
                     </section>
                     

@@ -16,7 +16,7 @@ const createAccount = async (req, res) => {
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(req.body.password.toString(), salt)
     const newUser = {
-        id: uuidv4(),
+        uuid: uuidv4(),
         username: req.body.username,
         email: req.body.email,
         password: hash,
@@ -42,13 +42,13 @@ const login = async (req, res, next) => {
             const tokenTime = 1800000
             const secret = process.env.SECRET; //grab secret
             const token = jwt.sign({
-                id: matchingUser.id,
+                id: matchingUser.uuid,
             }, secret, {
                 algorithm: "HS256",
                 expiresIn: "30 minutes",
             }) //set session up
             const requiredUserData = {
-                user: matchingUser.id,
+                user: matchingUser.uuid,
                 user_role: matchingUser.user_role,
                 token_expires_in: tokenTime
             }

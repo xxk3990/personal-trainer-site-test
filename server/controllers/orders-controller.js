@@ -4,6 +4,10 @@ const {
 const models = require('../models')
 const utils = require('./controller-utils')
 
+
+//The submit order method has been moved to the stripe-controller and occurs on payment success.
+
+
 const userOrders = async (req, res) => {
     const orders = await models.Order.findAll({
         where: {
@@ -65,26 +69,8 @@ const createOrder = async (req, res) => {
     }
 }
 
-const submitOrder = async (req, res) => {
-    const orderToSubmit = await models.Order.findOne({
-        where: {
-            'uuid': req.body.order_uuid
-        }
-    })
-    if (orderToSubmit.length === 0 || !orderToSubmit) { //if there is an issue with the items in their order
-        return res.status(400).send()
-    } else {
-        const orderDate = new Date(req.body.order_date).toISOString(); //update order date to date completed
-        orderToSubmit.order_date = orderDate;
-        orderToSubmit.completed = true;
-        await orderToSubmit.save();
-        return res.status(200).send();
-    }
-}
-
 module.exports = {
     userOrders,
     createOrder,
-    submitOrder,
     getOrderedProducts
 }

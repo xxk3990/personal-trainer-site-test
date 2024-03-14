@@ -17,7 +17,6 @@ const router = (app) => {
     app.get('/orderDetails', order.getOrderedProducts)
     app.get('/orders', mid.verifyRequestAuth, order.userOrders) //this one is for specific users, need another for admin purposes
     app.post('/orders', mid.verifyRequestAuth, order.createOrder)
-    app.put('/orders', mid.verifyRequestAuth, order.submitOrder)
     app.get('/order-items', mid.verifyRequestAuth, items.getOrderItems)
     app.post("/order-items", mid.verifyRequestAuth, items.createOrderItem);
     app.put('/order-items', mid.verifyRequestAuth, items.updateOrderItem);

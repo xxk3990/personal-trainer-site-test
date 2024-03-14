@@ -3,10 +3,13 @@ const stripePublic = process.env.STRIPE_PUB_KEY;
 
 
 const stripe = require("stripe")(stripeSecret)
+const models = require('../models');
 const loadCheckout = async (req, res) => {
     const customer = await stripe.customers.create({
         metadata: {
-            userId: req.query.user_uuid,
+            user_uuid: req.query.user_uuid,
+            order_uuid: req.body.order_uuid,
+            order_date: new Date(req.body.order_date).toISOString()
         }
     })
     try {
@@ -29,7 +32,7 @@ const loadCheckout = async (req, res) => {
             customer: customer.id,
             line_items,
             mode: 'payment',
-            success_url: `${process.env.CLIENT_URL}/paymentSuccess`,
+            success_url: `${process.env.CLIENT_URL}/userOrders`,
             cancel_url: `${process.env.CLIENT_URL}/shoppingCart`
         })
         return res.status(200).json({
@@ -58,12 +61,25 @@ const stripeWebhook = async (req, res) => {
     data = event.data.object;
     eventType = event.type;
 
-    if(eventType === "checkout.session.completed") {
-        stripe.customers.retrieve(data.customer).then(customer => {
+    if (eventType === "checkout.session.completed") {
+        stripe.customers.retrieve(data.customer).then(async customer => {
             console.log('customer:', customer)
             console.log("data", data)
+            //update order to completed = true on payment success
+            const orderToUpdate = await models.Order.findOne(({
+                where: {
+                    'uuid': customer.metadata.order_uuid,
+                    "user_uuid": customer.metadata.user_uuid
+                },
+            }))
+            orderToUpdate.completed = true;
+            orderToUpdate.order_date = customer.metadata.order_date;
+            await orderToUpdate.save();
+
         }).catch(err => console.log(err.message))
     }
+
+
 
 
 

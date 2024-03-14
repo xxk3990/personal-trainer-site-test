@@ -34,7 +34,6 @@ export default function ShoppingCart() {
             if(orderID === null || orderID === "") {
                 return;
             } else {
-                setCartItems([]) //clear previous cart
                 //Couldn't use default request service handleGet method as I also had to calc the order total on load
                 const host = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
                 const url = `${host}/order-items?orderID=${orderID}&userID=${localStorage.getItem("user_uuid")}`

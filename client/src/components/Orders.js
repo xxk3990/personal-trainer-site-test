@@ -22,7 +22,7 @@ export default function Orders() {
         document.title = "Your Orders"
         getOrders()
     },[])
-    
+    const sortedOrders = orders.sort((x, y) => new Date(y.updatedAt) - new Date(x.updatedAt))
     if(orders.length === 0) {
         return (
             <div className='Orders'>No Orders yet.</div>
@@ -31,7 +31,7 @@ export default function Orders() {
         return (
             <div className='Orders'>
                 <section className='orders-grid'>
-                    {orders.map(odr => {
+                    {sortedOrders.map(odr => {
                         return <OrderTile odr={odr} />
                     })}
                 </section>

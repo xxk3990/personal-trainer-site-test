@@ -55,7 +55,7 @@ export const handleDelete = (endpoint) => {
             "Content-Type": 'application/json',
             //"Authorization": `Bearer ${token}` 
         },
-        //credentials: 'include',
+        credentials: 'include',
     }
     return fetch(url, requestParams)
 }

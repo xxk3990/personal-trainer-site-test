@@ -12,16 +12,17 @@ export const useLogoutTimer = (minutes, setMinutes, seconds, setSeconds) => {
         }
     }, 60000)
     if (minutes <= 1) {
-        const interval = setInterval(() => {
+        window.interval = setInterval(() => {
             seconds--;
             setSeconds(seconds);
             localStorage.setItem("seconds", seconds)
         }, 1000)
         if (seconds === 0) {
+            clearInterval(window.interval);
             window.location.href = "/login"
             console.log("clear interval condition reached");
             handleLogout()
-            clearInterval(interval);
+            
         }
     }
     const endInterval = () => {

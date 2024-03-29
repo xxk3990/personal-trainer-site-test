@@ -68,3 +68,40 @@ button {
     padding: 0;
     width: 150px;
 }
+
+@media screen and (max-width: 600px) {
+    .product-info {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .product-info-mobile {
+        display: flex;
+        justify-content: space-evenly;
+    }
+
+    .product-name {
+        margin: 0;
+        padding: 0;
+    }
+
+    .product-info p {
+        width: 40px;
+    }
+
+    .product-edit-form {
+        position: relative;
+    }
+
+    .edit-delete-btns {
+        display: flex;
+        flex-direction: column;
+        align-items: end;
+    }
+
+    .edit-delete-btns button {
+        height: 20px;
+        width: 90px;
+        margin-left: 15px;
+    }
+}

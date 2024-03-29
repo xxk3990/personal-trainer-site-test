@@ -44,3 +44,22 @@ a:focus {
     border: none;
     cursor: pointer;
 }
+
+@media screen and (max-width: 600px) {
+    .Navbar {
+        position: fixed;
+    }
+    .nav-links-mobile {
+        display: flex;
+        justify-content: space-evenly;
+        z-index: 1;
+        list-style-type: none;
+        padding: 0;
+        width: 100%;
+    }
+    .nav-item {
+        border: none;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+}

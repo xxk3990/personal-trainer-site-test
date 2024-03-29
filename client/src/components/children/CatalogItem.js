@@ -18,12 +18,26 @@ export const CatalogItem = (props) => {
         //call parent "add to cart" method with child's unique product info
         addCartItem(item);
     }
-    return (
-        <section key={p.uuid} className="product-info">
-          <h3 id="productname">{p.product_name}</h3>
-          <p>${addDecimal(p.price)}</p>
-          <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
-          <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
-        </section>
-    )
+    if(window.screen.width < 600) {
+        return (
+            <section key={p.uuid} className="product-info">
+              <h3 className = "product-name">{p.product_name}</h3>
+              <section className="product-info-mobile">
+                <p>${addDecimal(p.price)}</p>
+                <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
+                <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
+              </section>
+            </section>
+        )
+    } else {
+        return (
+            <section key={p.uuid} className="product-info">
+              <h3 className="product-name">{p.product_name}</h3>
+              <p>${addDecimal(p.price)}</p>
+              <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
+              <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
+            </section>
+        )
+    }
+    
 }

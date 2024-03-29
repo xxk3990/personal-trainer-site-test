@@ -118,7 +118,7 @@ export default function Products() {
             <Snackbar open={openSnackbar} autoHideDuration={1500} message={snackbarMessage} anchorOrigin={{horizontal: "center", vertical:"top"}}/>
             <h4>No products yet!</h4>
             <section className='add-product'>
-                <span className='product-form-question' id="productname">
+                <span className='product-form-question'>
                     Product Name: 
                     <input type="text" 
                     className='user-input' 
@@ -165,7 +165,7 @@ export default function Products() {
                     })}
                 </section>
                 <section className='add-product'>
-                    <span className='product-form-question' id="productname">
+                    <span className='product-form-question'>
                         Product Name: 
                         <input type="text" 
                         className='user-input' 

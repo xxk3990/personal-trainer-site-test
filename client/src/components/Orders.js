@@ -6,6 +6,7 @@ import { handleGet } from '../services/requests-service';
 import '../styles/orders.css';
 import { checkAuth } from '../services/auth-service';
 import { OrderTile } from './children/OrderTile';
+import {v4 as uuidv4} from 'uuid'
 export default function Orders() {
     const [orders, setOrders] = useState([]);
     const navigate = useNavigate();
@@ -30,9 +31,10 @@ export default function Orders() {
     } else {
         return (
             <div className='Orders'>
+                <h1>Completed Orders</h1>
                 <section className='orders-grid'>
                     {sortedOrders.map(odr => {
-                        return <OrderTile odr={odr} />
+                        return <OrderTile key={uuidv4()} odr={odr} />
                     })}
                 </section>
             </div>

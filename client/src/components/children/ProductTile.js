@@ -11,26 +11,52 @@ export const ProductTile = (props) => {
         submitProductDelete(p);
     }
     const [showEditProduct, setShowEditProduct] = useState(false); //show and hide edit menu
-    return (
-        <section key={p.uuid} className="product-info">
-            <h3 id="productname">{p.product_name}</h3>
-            <img className="product-list-img" src={p.image_url} alt={p.product_name} />
-            <p>${addDecimal(p.price)}</p>
-            <span className='edit-delete-btns'>
-                <button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button>
-                <button className='show-hide-edit-btn' onClick={handleDelete}>Delete</button>
-            </span>
-            {/* Below code shows the menu based on the boolean value and passes in the submit update from the parent. */}
-            {showEditProduct ? 
-            <EditProduct 
-                p = {p} 
-                submitProductUpdate={submitProductUpdate} 
-                showEditProduct={showEditProduct} 
-                setShowEditProduct={setShowEditProduct}
-            /> 
-            : null}
-        </section>
-    )
+    if(window.screen.width < 600) {
+        return (
+            <section key={p.uuid} className="product-info">
+                <h3 className="product-name">{p.product_name}</h3>
+                <section className='product-info-mobile'>
+                    <img className="product-list-img" src={p.image_url} alt={p.product_name} />
+                    <p>${addDecimal(p.price)}</p>
+                    <span className='edit-delete-btns'>
+                        <button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button>
+                        <button className='show-hide-edit-btn' onClick={handleDelete}>Delete</button>
+                    </span>
+                </section>
+                {/* Below code shows the menu based on the boolean value and passes in the submit update from the parent. */}
+                {showEditProduct ? 
+                <EditProduct 
+                    p = {p} 
+                    submitProductUpdate={submitProductUpdate} 
+                    showEditProduct={showEditProduct} 
+                    setShowEditProduct={setShowEditProduct}
+                /> 
+                : null}
+            </section>
+        )
+    } else {
+        return (
+            <section key={p.uuid} className="product-info">
+                <h3 className="product-name">{p.product_name}</h3>
+                <img className="product-list-img" src={p.image_url} alt={p.product_name} />
+                <p>${addDecimal(p.price)}</p>
+                <span className='edit-delete-btns'>
+                    <button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button>
+                    <button className='show-hide-edit-btn' onClick={handleDelete}>Delete</button>
+                </span>
+                {/* Below code shows the menu based on the boolean value and passes in the submit update from the parent. */}
+                {showEditProduct ? 
+                <EditProduct 
+                    p = {p} 
+                    submitProductUpdate={submitProductUpdate} 
+                    showEditProduct={showEditProduct} 
+                    setShowEditProduct={setShowEditProduct}
+                /> 
+                : null}
+            </section>
+        )
+    }
+    
 }
 
 //I had to make this a separate method otherwise the html in it would appear for 

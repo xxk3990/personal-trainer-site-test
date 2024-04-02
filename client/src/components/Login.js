@@ -5,6 +5,7 @@ import { Snackbar } from '@mui/material';
 import { handleLogin } from '../services/auth-service'
 import { useNavigate } from 'react-router-dom';
 export default function Login() {
+  const NODE_URL = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
   const page = sessionStorage.getItem("page")
   const navigate = useNavigate()
   const [login, setLogin] = useState({
@@ -38,7 +39,7 @@ export default function Login() {
   }
   
   const submitLogin = async () => {
-    const postURL = `http://localhost:3000/login`
+    const postURL = `${NODE_URL}/login`
     const requestBody = {
       email: login.email,
       password: login.password,

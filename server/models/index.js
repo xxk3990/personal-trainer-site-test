@@ -8,7 +8,6 @@ const process = require("process")
 const environment = process.env.NODE_ENV;
 const config = require(`${__dirname}/../config/config.js`)[environment];
 const db = {};
-const bcrypt = require("bcrypt");
 const {
   productModel
 } = require('./product');
@@ -21,7 +20,7 @@ const {
 const {
   userModel
 } = require("./user")
-const rdsCa = fs.readFileSync('../server/us-east-2-bundle.pem');
+const rdsCa = fs.readFileSync(path.resolve(`${__dirname}`, "../us-east-2-bundle.pem"))
 
 const connectionOptions = {
   host: "",

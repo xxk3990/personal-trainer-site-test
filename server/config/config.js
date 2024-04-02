@@ -19,7 +19,7 @@ module.exports = {
   "production": {
     "username": "postgres",
     "password": process.env.RDS_PASSWORD,
-    "database": "personal_trainer_site",
+    "database": "personal_trainer_site_rds",
     "host": "personal-trainer-site.cg6tsyf9mgr3.us-east-2.rds.amazonaws.com",
     "dialect": "postgres"
   }

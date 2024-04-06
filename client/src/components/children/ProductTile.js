@@ -16,7 +16,7 @@ export const ProductTile = (props) => {
             <section key={p.uuid} className="product-info">
                 <h3 className="product-name">{p.product_name}</h3>
                 <section className='product-info-mobile'>
-                    <img className="product-list-img" src={p.image_url} alt={p.product_name} />
+                    {/* <img className="product-list-img" src={p.image_url} alt={p.product_name} /> */}
                     <p>${addDecimal(p.price)}</p>
                     <span className='edit-delete-btns'>
                         <button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button>
@@ -38,7 +38,7 @@ export const ProductTile = (props) => {
         return (
             <section key={p.uuid} className="product-info">
                 <h3 className="product-name">{p.product_name}</h3>
-                <img className="product-list-img" src={p.image_url} alt={p.product_name} />
+                {/* <img className="product-list-img" src={p.image_url} alt={p.product_name} /> */}
                 <p>${addDecimal(p.price)}</p>
                 <span className='edit-delete-btns'>
                     <button className='show-hide-edit-btn' onClick={() => setShowEditProduct(!showEditProduct)}>{showEditProduct ? `Close ${String.fromCharCode(8593)}` : `Edit Details ${String.fromCharCode(8595)}`}</button>
@@ -91,11 +91,11 @@ const EditProduct = (props) => {
             </span>
             <span className='product-update-display'>
                 <h4>Image:</h4>
-                <input className='product-update-input' 
+                {/* <input className='product-update-input' 
                 name="image_url" 
                 type="text" 
                 value={updatedProduct.image_url} 
-                onChange={e => handleChange(e.target.name, e.target.value)}/>
+                onChange={e => handleChange(e.target.name, e.target.value)}/> */}
             </span>
             <span className='product-update-display'>
                 <h4>Price:</h4>

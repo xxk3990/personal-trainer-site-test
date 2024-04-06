@@ -47,7 +47,7 @@ export default function Products() {
         const endpoint = `products`;
         const requestBody = {
             product_name: newProduct.productName,
-            image_url: newProduct.imageURL,
+            //image_url: newProduct.imageURL,
             price: newProduct.price,
         }
         try {
@@ -61,7 +61,7 @@ export default function Products() {
                     setOpenSnackbar(false);
                     setNewProduct({
                         productName: '',
-                        imageURL: '',
+                        //imageURL: '',
                         price: 0
                     })
                     setSnackbarMessage("")
@@ -126,17 +126,9 @@ export default function Products() {
                     value={newProduct.productName} 
                     onChange={e => handleChange(e.target.name, e.target.value)} required/>
                 </span>
-                <span className='product-form-question' id="product-image-url">
+                {/* <span className='product-form-question' id="product-image-url">
                     Product Image: 
-                    <input type="text" 
-                    className='user-input' 
-                    id="product-img" 
-                    name="imageURL" 
-                    value={newProduct.imageURL} 
-                    onChange={e => handleChange(e.target.name, e.target.value)} 
-                    required 
-                    placeholder='Please paste a proper link.'/>
-                </span>
+                </span> */}
                 <h5>You do not need to add the .00 for non-decimal prices, the site will do it for you! </h5>
                 <span className='product-form-question' id="productprice">Product Price: 
                     <input type="text" 
@@ -173,7 +165,7 @@ export default function Products() {
                         value={newProduct.productName} 
                         onChange={e => handleChange(e.target.name, e.target.value)} required/>
                     </span>
-                    <span className='product-form-question' id="productimage_url">
+                    {/* <span className='product-form-question' id="productimage_url">
                         Product Image: 
                         <input type="text" 
                         className='user-input' 
@@ -181,7 +173,7 @@ export default function Products() {
                         value={newProduct.imageURL} 
                         onChange={e => handleChange(e.target.name, e.target.value)} 
                         required placeholder='Please paste a proper link.'/>
-                    </span>
+                    </span> */}
                     <h5>You do not need to add the .00 for non-decimal prices, the site will do it for you! </h5>
                     <span className='product-form-question' id="productprice">
                         Product Price: 

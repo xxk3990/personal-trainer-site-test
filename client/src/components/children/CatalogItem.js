@@ -11,7 +11,7 @@ export const CatalogItem = (props) => {
         product_name: p.product_name,
         product_uuid: p.uuid,
         price: p.price,
-        image_url: p.image_url,
+        //image_url: p.image_url,
         quantity: 1
     }
     const handleClick = () => {
@@ -24,7 +24,7 @@ export const CatalogItem = (props) => {
               <h3 className = "product-name">{p.product_name}</h3>
               <section className="product-info-mobile">
                 <p>${addDecimal(p.price)}</p>
-                <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
+                {/* <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/> */}
                 <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
               </section>
             </section>
@@ -34,7 +34,7 @@ export const CatalogItem = (props) => {
             <section key={p.uuid} className="product-info">
               <h3 className="product-name">{p.product_name}</h3>
               <p>${addDecimal(p.price)}</p>
-              <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/>
+              {/* <img className="product-img-brochure" src = {p.image_url} alt={item.product_name}/> */}
               <button type="button" className='add-to-order-btn' onClick={handleClick}>Add to Cart</button>
             </section>
         )

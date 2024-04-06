@@ -1,4 +1,5 @@
 import { useState } from "react";
+const NODE_URL = process.env.REACT_APP_NODE_LOCAL || process.env.REACT_APP_NODE_PROD
 export const useLocalStorage = (keyName) => {
     const [storedValue, setStoredValue] = useState(() => {
         try {
@@ -23,6 +24,7 @@ export const useLocalStorage = (keyName) => {
 };
 
 export const handleLogin = async (url, body) => {
+    console.log(url);
     const loginParams = {
         method: 'POST',
         headers: {
@@ -35,8 +37,9 @@ export const handleLogin = async (url, body) => {
 }
 
 export const handleLogout = async () => {
+    
     localStorage.clear();
-    const url = `http://localhost:3000/logout`
+    const url = `${NODE_URL}/logout`
     const logoutParams = {
         method: "POST",
         headers: {
@@ -49,7 +52,7 @@ export const handleLogout = async () => {
 }
 
 export const checkAuth = async () => {
-    const response = await fetch('http://localhost:3000/verify', {
+    const response = await fetch(`${NODE_URL}/verify`, {
         method: 'GET',
         credentials: "include"
     })

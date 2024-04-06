@@ -27,7 +27,7 @@ const getOrderItems = async (req, res) => {
             })
             //add product fields to array sent to FE
             cart[i].product_name = matchingProduct.product_name,
-            cart[i].image_url = matchingProduct.image_url
+            //cart[i].image_url = matchingProduct.image_url
             cart[i].item_total = matchingProduct.price * cart[i].quantity;
         }
         const total = cart.map(x => x.item_total).reduce((acc, val) => {

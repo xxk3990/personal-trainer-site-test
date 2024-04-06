@@ -19,7 +19,7 @@ const addProduct = async (req, res) => {
         //id, product_name, image_url, price
         uuid: uuidv4(),
         product_name: req.body.product_name,
-        image_url: req.body.image_url, //replace with AWS link later on
+       // image_url: req.body.image_url, //replace with AWS link later on
         price: priceAsInt,
     }
     res.status(201).send({
@@ -38,7 +38,7 @@ const updateProduct = async (req, res) => {
     try {
         prodToUpdate.price = utils.removeDecimalOrAddZeros(prod.price);
         prodToUpdate.product_name = prod.product_name;
-        prodToUpdate.image_url = prod.image_url;
+        //prodToUpdate.image_url = prod.image_url;
         await prodToUpdate.save();
         return res.status(200).send()
     } catch {

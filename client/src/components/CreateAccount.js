@@ -25,7 +25,7 @@ export default function CreateAccount() {
       first_name: data.firstname,
       last_name: data.lastname,
       dob: data.dob,
-      user_role: data.role
+      user_role: 'user'
     }
     const requestParams = {
       method: 'POST',
@@ -75,15 +75,6 @@ export default function CreateAccount() {
           <span className='user-form-question' id="date-of-birth">
             Date of Birth: <input type='date' name='dob' className='date-input' min="1970-01-01" max="2024-12-31" {...register("dob", {required: true})}/>
             {errors.dob && <span className='required-note'>This field is required</span>}
-          </span>
-          <span className='user-form-question' id="user-role">
-            Type of User: 
-            <select name='role' className='user-input' {...register("role", {required: true})}>
-              <option>Select User Type</option>
-              <option value="User">User</option>
-              <option value="Admin">Admin</option>
-            </select>
-            {errors.role && <span className='required-note'>This field is required</span>}
           </span>
           <button type='submit'>Submit</button>
         </form>

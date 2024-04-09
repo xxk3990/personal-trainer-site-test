@@ -10,7 +10,7 @@ const stripe = require("./controllers/stripe-controller")
 const app = express();
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:3001", "https://www.xanderkaylanlabs.com", "https://xanderkaylanlabs.com"],
+    origin: ["http://localhost:3001", "https://www.robwtraining.com", "https://robwtraining.com"],
     credentials: true
 }))
 //apparently the stripe webhook has to go here before I call app.use(express.json())

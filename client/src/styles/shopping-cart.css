@@ -3,12 +3,12 @@
     flex-direction: column;
     align-items: center;
 }
+
 .products-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(1, 1fr);
 }
-
 
 .product-info {
     border: 1px solid black;
@@ -71,7 +71,18 @@ button {
 
 .cart-footer {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cart-footer span {
+    display: flex;
+    justify-content: space-evenly;
+    padding-left: 10px;
+}
+
+.cart-footer span p { 
+    margin: 0 5px 0 5px;
 }
 
 .cart-item-footer {
@@ -82,4 +93,53 @@ button {
 
 .MuiPaper-root.css-15e48vx-MuiPaper-root-MuiSnackbarContent-root {
     min-width: 150px;
+}
+
+.checkout-btn,
+.submit-order-btn {
+    width: 200px;
+    height: 25px;
+}
+
+@media screen and (max-width: 600px) {
+    .ShoppingCart {
+        margin-top: 15%;
+    }
+    section.products-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .cart-items-list {
+        width: 85vw;
+    }
+
+    .product-details {
+        height: 125px;
+    }
+
+    .product-details img {
+        max-height: 75px;
+    }
+
+    .product-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        padding: 0;
+        margin: 0;
+        text-align: center;
+    }
+
+    .product-info-mobile {
+        display: flex;
+        justify-content: space-evenly;
+    }
+
+    .product-info button {
+        max-height: 50px;
+        margin-top: 5px;
+    }
 }

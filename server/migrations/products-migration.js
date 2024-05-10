@@ -10,7 +10,7 @@ module.exports = {
         autoIncrementIdentity: true
       },
       product_name: Sequelize.STRING,
-      image_url: Sequelize.STRING,
+      image_key: Sequelize.STRING,
       price: Sequelize.INTEGER,
       created_at: {
         allowNull: false,

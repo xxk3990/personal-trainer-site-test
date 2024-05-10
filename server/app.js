@@ -6,9 +6,15 @@ const { expressjwt: jwt } = require("express-jwt");
 const process = require('process')
 const router = require("./router");
 const environment = process.env.NODE_ENV;
+const stripe = require("./controllers/stripe-controller")
 const app = express();
 app.use(cookieParser());
-app.use(cors({origin: '*'}))
+app.use(cors({
+    origin: ["http://localhost:3001", "https://www.robwtraining.com", "https://robwtraining.com"],
+    credentials: true
+}))
+//apparently the stripe webhook has to go here before I call app.use(express.json())
+app.post("/webhook", express.raw({type: 'application/json'}), stripe.stripeWebhook)
 app.use(express.json());
 const port = process.env.PORT || 3000
 

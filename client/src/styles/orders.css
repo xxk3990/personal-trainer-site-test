@@ -6,11 +6,59 @@
 .orders-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    width: 50vw;
+    width: 60vw;
 }
+
 .order-info {
+    padding: 0 15px 0 15px;
+    margin-top: 10px;
+    width: 300px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.order-products-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     border: 1px solid black;
 }
+
+
+.order-detail {
+    background-color: white;
+    border-top: 1px solid black;
+    width: 300px;
+}
+
+.order-detail span {
+    display: flex;
+    justify-content: space-around;
+}
+
+.order-detail span p {
+    margin: 5px;
+}
+
+.order-detail h4 {
+    margin: 5px 0 5px 0;
+}
+
+@media screen and (max-width: 600px) {
+    .Orders {
+        margin-top: 15%;
+    }
+    section.orders-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+
+

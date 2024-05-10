@@ -8,7 +8,7 @@ const productModel = (sequelize, DataTypes) => {
             autoIncrementIdentity: true
         },
         product_name: DataTypes.STRING,
-        image_url: DataTypes.STRING,
+        image_key: DataTypes.STRING,
         price: DataTypes.INTEGER,
         },
         {
